@@ -1,0 +1,48 @@
+{
+    "name": "triqui",
+    "version": "0.1.0",
+    "description": "A renderer agnostic platformer character engine built on ray casting, with tile levels, running, jumping, moving platforms, sensors and projectiles.",
+    "author": "Emanuele Feronato",
+    "license": "MIT",
+    "type": "module",
+    "main": "src/triqui.js",
+    "exports": {
+        ".": "./src/triqui.js"
+    },
+    "files": [
+        "src/triqui.js",
+        "src/raycast.js"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/triqui/triqui-engine.git"
+    },
+    "bugs": {
+        "url": "https://github.com/triqui/triqui-engine/issues"
+    },
+    "homepage": "https://github.com/triqui/triqui-engine",
+    "keywords": [
+        "javascript",
+        "platformer",
+        "game-development",
+        "engine",
+        "physics",
+        "raycasting",
+        "tilemap"
+    ],
+    "scripts": {
+        "test": "node --test \"tests/*.test.js\"",
+        "smoke": "node tools/smoke.mjs",
+        "types": "tsc -p types",
+        "reach": "node tools/reach.mjs",
+        "nav": "node tools/nav.mjs",
+        "check": "node tools/raycast-intact.mjs && node tools/nav.mjs --check && npm test && npm run smoke && npm run types",
+        "levels": "node tools/levels.mjs"
+    },
+    "engines": {
+        "node": ">=22"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.0"
+    }
+}

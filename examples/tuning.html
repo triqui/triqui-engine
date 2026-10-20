@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>triqui - the numbers, with your hands on them</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 24px;
+    background: #fff;
+    color: #000;
+    font: 14px/1.5 -apple-system, system-ui, sans-serif;
+}
+
+main { max-width: 820px; margin: 0 auto; }
+
+h1 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
+
+.intro { margin: 0 0 12px; }
+
+.intro a { color: #000; }
+
+.readout {
+    border: 1px solid #000;
+    border-bottom: 0;
+    padding: 8px 12px;
+    font: 12px/1.7 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.readout div { display: flex; gap: 14px; }
+
+.readout .name { color: #666; width: 92px; flex: none; }
+
+.readout .value { white-space: pre; }
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid #000;
+    touch-action: none;
+}
+.panel {
+    border: 1px solid #000;
+    border-top: 0;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2px 24px;
+    font: 12px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.knob { display: flex; align-items: center; gap: 10px; }
+
+.knob-name { width: 108px; flex: none; color: #666; }
+
+.knob-value { width: 82px; flex: none; text-align: right; }
+
+.knob input[type="range"] {
+    flex: 1;
+    min-width: 80px;
+    accent-color: #000;
+}
+
+.presets {
+    border: 1px solid #000;
+    border-top: 0;
+    padding: 10px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.presets .caption { color: #666; font: 12px/1.6 ui-monospace, Menlo, monospace; }
+
+button {
+    font: inherit;
+    color: #000;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 1px 10px;
+    cursor: pointer;
+}
+
+button:hover { background: #f0f0f0; }
+
+.figures {
+    border: 1px solid #000;
+    border-top: 0;
+    padding: 10px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+    font: 12px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.figures div { display: flex; gap: 10px; }
+
+.figure-name { color: #666; }
+</style>
+</head>
+<body>
+<main>
+    <h1>triqui - the numbers, with your hands on them</h1>
+    <p class="intro">
+        The room works like a ruler: four bars at two, three, four and five tiles above the floor,
+        and two gaps in it at two and three tiles wide. The default character clears the
+        lowest bar and both gaps and nothing else. Drag anything and the very next physics
+        step already runs on the new number. There is nothing to rebuild, because the
+        tuning is a plain object read at the top of every step.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
+
+    <canvas id="view" width="800" height="448"></canvas>
+    <div class="panel" id="controls"></div>
+    <div class="presets" id="presets"><span class="caption">whole characters:</span></div>
+    <div class="figures" id="figures"></div>
+</main>
+
+<script type="module" src="./tuning.js"></script>
+</body>
+</html>

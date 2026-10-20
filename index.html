@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>triqui - a tile level, movement and a jump</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 24px;
+    background: #fff;
+    color: #000;
+    font: 14px/1.5 -apple-system, system-ui, sans-serif;
+}
+
+main { max-width: 820px; margin: 0 auto; }
+
+h1 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
+
+.intro { margin: 0 0 12px; }
+
+button {
+    font: inherit;
+    color: #000;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 0 8px;
+    cursor: pointer;
+}
+
+button:hover { background: #f0f0f0; }
+
+.intro a { color: #000; }
+
+.readout {
+    border: 1px solid #000;
+    border-bottom: 0;
+    padding: 8px 12px;
+    font: 12px/1.7 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.readout div { display: flex; gap: 14px; }
+
+.readout .name { color: #666; width: 72px; flex: none; }
+
+.readout .value { white-space: pre; }
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid #000;
+    touch-action: none;
+}
+</style>
+</head>
+<body>
+<main>
+    <h1>triqui - a tile level, movement and a jump</h1>
+    <p class="intro">
+        Two characters, one keyboard: run with <strong>A</strong> <strong>D</strong> or the
+        <strong>arrow keys</strong>, jump with <strong>space</strong> - hold it for a taller
+        jump. <strong>G</strong> turns gravity a quarter, and they turn with it. They can
+        stand on each other. <button id="toggle">show rays</button>
+        <br><a href="./examples/minimal.html">more examples</a>
+    </p>
+
+    <div class="readout" id="readout"></div>
+
+    <canvas id="view" width="800" height="480"></canvas>
+</main>
+
+<!-- three ids and nothing else: #view to draw on, #readout for the numbers,
+     #toggle for the rays. -->
+<script type="module" src="./game.js"></script>
+</body>
+</html>
