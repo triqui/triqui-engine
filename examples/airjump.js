@@ -1,14 +1,13 @@
 /**
     * @file airjump.js, the second and third jumps.
     *
-    * Three jumps: one off the ground and two out of nothing. They are spent as
-    * they are used and handed back by the ground, and an air jump pushes a little
-    * less hard than the first, so the second is never simply the better one.
+    * The character has three jumps: one from the ground and two in the air
+    * ('airJumps: 2'). Air jumps are restored on landing, and 'airJumpSpeed' is
+    * slightly lower than 'jumpSpeed'.
     *
-    * One press can mean three different jumps, and the order they are tried in is
-    * the order a player means them: off the ground if there is any under you, off
-    * a wall if there is one beside you, and out of thin air only when there is
-    * neither. The jump buffer and coyote time still apply to all of them.
+    * A jump press is resolved in this order: a ground jump when grounded, a wall
+    * jump when a wall is available, otherwise an air jump. Coyote time and the
+    * jump buffer apply to all of them.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -37,8 +36,8 @@ const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
 
 /**
-    * What this character can do that a plain one cannot. Everything here is off
-    * by default in the engine: abilities are given, not assumed.
+    * Tuning overrides that enable this example's abilities. All abilities are
+    * disabled in the default tuning.
     *
     * @type {object}
 */
@@ -53,13 +52,12 @@ const keys = { left: 0, right: 0, up: 0, down: 0, jump: false, jumpPressed: fals
     dash: false, dashPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -137,14 +135,14 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * @type {number} the highest ledge stood on, in rows above the floor.
+    * @type {number} highest ledge reached, in rows above the floor.
 */
 let best = 0;
 
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -176,8 +174,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the level and the character, the character marked with what it is
-    * doing at that moment.
+    * Draws the level and the character, with a marker for its current state.
 */
 function draw() {
     const body = player.body;
@@ -208,14 +205,13 @@ function draw() {
     context.fillRect(drawX, drawY, body.width, body.height);
     context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
-    /* A notch on the side it is looking, which the engine keeps for us because a
-       dash with no direction held has to go somewhere. */
+    /* Facing notch, from 'body.facing'. */
     context.fillStyle = '#000';
     context.fillRect(drawX + (body.facing > 0 ? body.width - 4 : 0), drawY + 6, 4, 5);
 }
 
 /**
-    * Writes out what the character has left and what it is doing.
+    * Writes the remaining abilities and the current state to the readout.
 */
 function report() {
     readout.innerHTML = [

@@ -1,19 +1,19 @@
 /**
-    * @file reach.mjs, plays a level to find out whether every ledge connects.
+    * @file reach.mjs, brute force reachability check for a level.
     *
-    * It reads the LEGEND out of a game file, finds every ledge (a run of tiles with
-    * open air above), and from every foothold on each tries a run up, a direction
-    * held from the first frame of the jump, and every length of press from a tap to
-    * a full hold. Where the character lands builds a graph, and the graph answers
-    * the only question a level has to: can every ledge be reached from the floor,
-    * and left again.
+    * Reads the LEGEND from a game file and finds every ledge, a run of solid
+    * tiles with empty cells above. From every standing position it simulates
+    * jumps with each run up, a direction held from the start of the jump, and
+    * every press duration from a tap to a full hold. The landings form a graph,
+    * which is checked: every ledge must be reachable from the floor and every
+    * ledge must be leavable.
     *
-    * The direction is held from the first frame because that is how people play.
-    * A route that only works by steering late is not counted.
+    * The direction is held from the start of the jump. Routes that require
+    * steering later in the jump are not counted.
     *
-    * '.' is empty, '=' is a one way deck, anything else is solid. Levels that are
-    * not meant to be climbed, such as a shaft for wall jumps, a drop or a room you
-    * cross by gliding, will fail, and they should.
+    * '.' is empty, '=' is a one way platform, any other character is solid.
+    * Levels designed for other abilities (wall jumps, drops, gliding) fail by
+    * design.
     *
     * Usage:
     *     node tools/reach.mjs game.js
@@ -68,7 +68,7 @@ const nameOf = ledge => `row ${ledge.row}, columns ${ledge.from}-${ledge.to}`;
 
 /**
     * @param {object} body a standing body.
-    * @returns {number} which ledge it stands on, or -1.
+    * @returns {number} index of the ledge it stands on, or -1.
 */
 function ledgeUnder(body) {
     if (!body.grounded) {
@@ -81,9 +81,9 @@ function ledgeUnder(body) {
 }
 
 /**
-    * One jump: stand, run, press for so long, see where it ends.
+    * Simulates one jump with the given run up, direction and press duration.
     *
-    * @returns {number} the ledge landed on, or -1.
+    * @returns {number} index of the ledge landed on, or -1.
 */
 function attempt(x, y, speed, dir, hold) {
     const engine = new TriquiEngine(world, { step: STEP });
@@ -149,7 +149,7 @@ ledges.forEach((ledge, index) => {
 });
 
 /**
-    * @returns {Set<number>} everything reachable from one ledge.
+    * @returns {Set<number>} ledges reachable from one ledge.
 */
 function visit(from, links) {
     const seen = new Set([from]);
@@ -165,7 +165,7 @@ function visit(from, links) {
     return seen;
 }
 
-/* The floor is the longest ledge on the lowest row that has one. */
+/* The floor is the longest ledge on the lowest row that has ledges. */
 const lowest = Math.max(...ledges.map(ledge => ledge.row));
 const floor = ledges.reduce((best, ledge, index) =>
     (ledge.row === lowest && (best < 0

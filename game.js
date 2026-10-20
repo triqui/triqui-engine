@@ -1,10 +1,8 @@
 /**
-    * @file game.js, the smallest thing the engine can be asked to do.
+    * @file game.js, the demo: a tile level with two characters.
     *
-    * A tile level, a character that runs and jumps, and a drawing of both. The
-    * engine holds the physics; everything in this file is the parts an engine has
-    * no business owning: which keys mean what, what the level looks like and what
-    * to put on the screen.
+    * The engine handles the physics. This file contains only game code: key
+    * bindings, the level layout and rendering.
     *
     * It expects three elements in the page: a canvas with the id 'view', a
     * container with the id 'readout', and a button with the id 'toggle'.
@@ -20,15 +18,13 @@ import { TriquiWorld, TriquiEngine } from './src/triqui.js';
 const TILE_SIZE = 32;
 
 /**
-    * This is the level, written out. '#' is solid and '.' is empty, and the wall
-    * around the outside is what keeps anything from leaving: the grid reports cells
-    * beyond the MAP as empty, so a level that must hold has to say so itself.
+    * The level layout. '#' is solid and '.' is empty. The grid reports cells
+    * outside the map as empty, so the level needs a solid border.
     *
-    * Every ledge in here can be climbed to from the floor, and left again,
-    * holding a direction from the first frame of the jump. That is a property of
-    * the numbers in the engine as much as of the shape drawn here: the jump
-    * lifts the character a little over two tiles, so a ledge sits two rows up and
-    * one or two columns to the side, never straight overhead.
+    * Every ledge can be reached from the floor and left again with the default
+    * tuning, holding a direction from the start of the jump. The default jump
+    * height is about 2.4 tiles, so ledges are two rows up and one or two columns
+    * to the side, never directly overhead.
     *
     * @type {string[]}
 */
@@ -51,25 +47,24 @@ const LEGEND = [
 ];
 
 /**
-    * @type {number[][]} the same level as tile identifiers, indexed as
-    *                    MAP[row][column], which is what the grid reads.
+    * @type {number[][]} the level as tile identifiers, indexed as
+    *                    MAP[row][column].
 */
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * @type {number} how big a character is. A little shorter than a cell, so that
-    *                it fits through the two row gap a ledge above the floor leaves.
+    * @type {number} character size. Slightly smaller than a cell, so it fits
+    *                through a two row gap.
 */
 const PLAYER_WIDTH = 20;
 const PLAYER_HEIGHT = 28;
 
 /**
-    * Where the characters start. Add a line and there is another one: the engine
-    * keeps a list and does not care how long it is.
+    * Start positions. Each entry creates one character; the engine has no limit
+    * on the number of characters.
     *
-    * Both of them answer to the same keys, which is the point of starting them
-    * apart. The same input from two different places stops being the same thing the
-    * moment one of them meets a wall the other does not.
+    * All characters share the same input. They start in different places, so
+    * their paths diverge as soon as one of them hits a wall.
     *
     * @type {Array<{x: number, y: number}>}
 */
@@ -79,9 +74,7 @@ const SPAWNS = [
 ];
 
 /**
-    * The four ways gravity can point here, and how hard it pulls. Nothing in the
-    * engine says down has to be down, so this is a list the demo cycles through
-    * rather than a setting it had to ask for.
+    * The four gravity directions the demo cycles through with G.
     *
     * @type {Array<{name: string, x: number, y: number}>}
 */
@@ -93,7 +86,7 @@ const GRAVITY_DIRECTIONS = [
 ];
 
 /**
-    * @type {number} how hard gravity pulls, in pixels per second squared.
+    * @type {number} gravity strength, in pixels per second squared.
 */
 const GRAVITY_STRENGTH = 2000;
 
@@ -103,15 +96,14 @@ const players = SPAWNS.map(spawn =>
     engine.spawn(spawn.x, spawn.y, PLAYER_WIDTH, PLAYER_HEIGHT));
 
 /**
-    * @type {number[]} how many times each character has landed. Counting it is
-    *                  the short way of showing why an event is not a state:
-    *                  'grounded' is true for hundreds of frames in a row, a
-    *                  landing happens once.
+    * @type {number[]} landing count per character, from 'justLanded'. Unlike
+    *                  'grounded', which stays true while standing, 'justLanded'
+    *                  is set once per landing.
 */
 const landings = players.map(() => 0);
 
 /**
-    * @type {number} which of the four directions gravity is pointing.
+    * @type {number} index of the current gravity direction.
 */
 let gravityAt = 0;
 
@@ -123,10 +115,9 @@ const JUMP_KEYS = ['Space', 'ArrowUp', 'KeyW'];
 const GRAVITY_KEY = 'KeyG';
 
 /**
-    * What the keyboard is saying. It is read here and copied into every character
-    * once per frame: the engine gives each of them an input of its own, and a
-    * second keyboard, a gamepad or something thinking for itself would write into
-    * theirs instead of this.
+    * Keyboard state. It is copied into the input of every character once per
+    * frame. Each character has its own input object, so a gamepad or AI could
+    * write to it instead.
     *
     * @type {{left: number, right: number, jump: boolean, jumpPressed: boolean}}
 */
@@ -141,8 +132,8 @@ addEventListener('keydown', event => {
     }
     if (JUMP_KEYS.includes(event.code)) {
         /*
-            * The press is an edge, not a state: holding the key down must not
-            * start a second jump on landing.
+            * 'jumpPressed' is set only on the keydown that changes the key
+            * state, so key repeat does not trigger a jump on landing.
         */
         if (!keys.jump) {
             keys.jumpPressed = true;
@@ -154,8 +145,8 @@ addEventListener('keydown', event => {
         const where = GRAVITY_DIRECTIONS[gravityAt];
         engine.setGravity(where.x * GRAVITY_STRENGTH, where.y * GRAVITY_STRENGTH);
     }
-    /* Only our keys, and never with a modifier held, so browser shortcuts such
-       as Ctrl+D or F12 still reach the browser. */
+    /* Prevent the default action only for game keys without modifiers, so
+       browser shortcuts such as Ctrl+D and F12 keep working. */
     const modified = event.ctrlKey || event.metaKey || event.altKey;
     if (!modified && (LEFT_KEYS.includes(event.code) || RIGHT_KEYS.includes(event.code)
         || JUMP_KEYS.includes(event.code))) {
@@ -176,8 +167,8 @@ addEventListener('keyup', event => {
 });
 
 /*
-    * A key held while the window loses focus never sends its keyup, and the
-    * character would walk off on its own.
+    * Release all keys on blur: a key held while the window loses focus never
+    * sends keyup.
 */
 addEventListener('blur', () => {
     Object.assign(keys, { left: 0, right: 0, jump: false, jumpPressed: false });
@@ -189,14 +180,14 @@ toggle.addEventListener('click', () => {
     const collider = engine.collider;
     collider.recordRays = !collider.recordRays;
     toggle.textContent = collider.recordRays ? 'hide rays' : 'show rays';
-    toggle.blur();                      // or the space bar would press it again
+    toggle.blur();                      // otherwise the space bar would activate the button again
 });
 
 /* ── drawing ────────────────────────────────────────────────────────────── */
 
 /**
-    * @type {number} shortest a drawn ray may be. A step is a fraction of a pixel
-    *                long, so a ray drawn true to length would be invisible.
+    * @type {number} minimum drawn ray length. Rays cover a fraction of a pixel
+    *                per step, so they are lengthened to be visible.
 */
 const MIN_RAY_LENGTH = 11;
 
@@ -206,12 +197,12 @@ const MIN_RAY_LENGTH = 11;
 const CONTACT_DOT_RADIUS = 2.5;
 
 /**
-    * @type {number} highest device pixel ratio worth backing the canvas with.
+    * @type {number} maximum device pixel ratio used for the canvas.
 */
 const MAX_PIXEL_RATIO = 2;
 
 /**
-    * @type {string} the number drawn inside a character, telling it from the rest.
+    * @type {string} label drawn inside each character.
 */
 const PLAYER_LABEL_FONT = '10px ui-monospace, Menlo, Consolas, monospace';
 
@@ -227,13 +218,11 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * Draws the level, the character, and the casts behind it if they are on.
+    * Draws the level, the characters, and the rays when enabled.
 */
 function draw() {
     /*
-        * Physics stepped at its own pace and stopped somewhere short of now. This
-        * is how far short, and it is what turns a character that ticks into one
-        * that moves.
+        * Interpolation factor between the last two physics steps.
     */
     const alpha = engine.alpha;
 
@@ -284,8 +273,8 @@ function draw() {
         context.fillRect(drawX, drawY, body.width, body.height);
         context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
-        /* Filled or hollow says whether it is standing; the number says which
-           one of them it is. */
+        /* Filled when grounded, hollow when airborne; the label identifies the
+           character. */
         context.fillStyle = body.grounded ? '#fff' : '#000';
         context.fillText(String(index + 1),
                          drawX + body.width / 2, drawY + body.height / 2);
@@ -295,15 +284,12 @@ function draw() {
 /**
     * Draws the casts of the last physics step.
     *
-    * A step is a fraction of a pixel long, so the lines are stretched to a
-    * readable minimum. What is true of them is where they start, which way they
-    * point and whether they found anything.
+    * Rays are lengthened to a minimum length; origin, direction and hit state
+    * are exact.
     *
-    * One collider serves every character, so the rays of all of them arrive in
-    * one list and each says which body cast it. That matters here: a ray is cast
-    * from where its body is and drawn from where its body is drawn, a fraction of
-    * a step ahead, and shifting them all by the same amount would leave one
-    * character's rays floating beside the other.
+    * One collider serves every character, so all rays are in one list and each
+    * records its body. Each ray is offset by its own body's interpolation offset,
+    * so it stays attached to the drawn body.
     *
     * @param {number} alpha how far the frame is between the last two steps.
 */
@@ -339,11 +325,10 @@ function drawRays(alpha) {
 const readout = document.getElementById('readout');
 
 /**
-    * Writes a number in a fixed width, so the panel does not shift as the digits
-    * change.
+    * Formats a number with a fixed width, so the readout columns stay aligned.
     *
-    * @param {number} value  the number to write.
-    * @param {number} places decimals to keep.
+    * @param {number} value  the number to format.
+    * @param {number} places number of decimals.
     * @returns {string} the number, right aligned in six columns.
 */
 function figure(value, places) {
@@ -351,8 +336,7 @@ function figure(value, places) {
 }
 
 /**
-    * Fills the panel above the canvas: a line of numbers for each character, and
-    * a heading so the columns mean something.
+    * Writes the readout: a header line and one line per character.
 */
 function report() {
     const heading = 'position'.padEnd(16) + 'velocity'.padEnd(15)
@@ -374,8 +358,8 @@ function report() {
 }
 
 /**
-    * Says in one word what a character is doing, which is the sort of thing a
-    * renderer would pick an animation from.
+    * Returns the character state as one word, for example to select an
+    * animation.
     *
     * @param {object} body the character's body.
     * @returns {string} 'standing', 'rising' or 'falling'.
@@ -384,7 +368,7 @@ function state(body) {
     if (body.grounded) {
         return 'standing';
     }
-    /* Rising means away from wherever gravity is pulling, not upwards. */
+    /* Rising means moving against gravity, not upwards on screen. */
     const fall = body.velocityX * body.downX + body.velocityY * body.downY;
     return fall < 0 ? 'rising' : 'falling';
 }
@@ -394,16 +378,14 @@ function state(body) {
 let previous = performance.now();
 
 /**
-    * One frame: pass the keyboard on, hand the engine the time that has passed,
-    * then draw whatever it did with it.
+    * Copies the input, advances the engine by the elapsed time and draws.
     *
-    * @param {number} now the time this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     /*
-        * One keyboard drives every character. The press is copied rather than
-        * shared, because the engine spends each character's 'jumpPressed' on its
-        * first step and clearing one must not clear the others.
+        * The keyboard state is copied into each character's input. The engine
+        * clears each 'jumpPressed' separately, so the inputs must not be shared.
     */
     for (const player of players) {
         player.input.left = keys.left;

@@ -1,15 +1,13 @@
 /**
-    * @file feel.js, what coyote time and the jump buffer are actually worth.
+    * @file feel.js, coyote time and jump buffer compared.
     *
-    * The page holds two copies of the same level side by side, with one character
-    * in each. They answer to the same keys and differ in two numbers: the one on
-    * the left has coyote time and jump buffer set to zero, the one on the right
-    * keeps the defaults. Nothing else about them is different.
+    * Two copies of the same level are shown side by side, with one character in
+    * each. Both use the same input. The left character has 'coyoteTime' and
+    * 'jumpBuffer' set to zero, the right one uses the defaults.
     *
-    * Run off a ledge and press jump a frame late, or press it a frame before
-    * landing, and the two part company. Which is the whole argument for the
-    * feature: it changes nothing about the physics and everything about being
-    * believed.
+    * A jump pressed a few frames after leaving a ledge, or a few frames before
+    * landing, works only for the right character. The physics is otherwise
+    * identical.
 */
 
 import { TriquiWorld, TriquiEngine, DEFAULT_TUNING } from '../src/triqui.js';
@@ -39,7 +37,7 @@ const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
 
 /**
-    * The two characters, and what tells them apart.
+    * The two characters and their names.
     *
     * @type {Array<{name: string, controller: object}>}
 */
@@ -52,13 +50,12 @@ const runners = [
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -114,16 +111,16 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * @type {number[]} how many times each of them has fallen into the gap.
+    * @type {number[]} number of falls into the gap, per character.
 */
 const falls = runners.map(() => 0);
 
 let previous = performance.now();
 
 /**
-    * One frame: the same keys to both, then draw them and the tally.
+    * Copies the input to both characters, advances the engine and draws.
     *
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     for (const runner of runners) {
@@ -141,7 +138,7 @@ function frame(now) {
     previous = now;
 
     runners.forEach((runner, index) => {
-        /* Landing on the bottom row means the ledge was missed. */
+        /* A landing on the bottom row counts as a missed ledge. */
         const body = runner.controller.body;
         if (body.justLanded && body.y + body.height === 12 * TILE_SIZE) {
             falls[index]++;

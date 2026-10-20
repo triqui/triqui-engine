@@ -1,26 +1,23 @@
 /**
-    * @file wrap.js, a room with no floor and no ceiling.
+    * @file wrap.js, vertical screen wrap.
     *
-    * Fall out of the bottom and you come back in at the top, in the same column
-    * and at the same speed. That one rule turns falling from a mistake into a way
-    * of getting somewhere: the ledge at the top left cannot be jumped to from
-    * anywhere, and the only way onto it is to drop off the bottom above the right
-    * column and ride the fall back round.
+    * A character that falls out of the bottom reappears at the top, in the same
+    * column and with the same velocity. The ledge at the top left cannot be
+    * reached by jumping; the only way onto it is to fall through the bottom in
+    * the right column.
     *
-    * Nothing in the engine knows about any of this, and nothing in it had to
-    * change. The grid reports everything past its edges as empty, so a body that
-    * leaves simply keeps falling; 'place' moves a body and the position it is
-    * drawn from together, so the jump from the bottom of the screen to the top is
-    * not smeared across everything in between; and a body coming back in from
-    * outside meets the tiles on the way like any other.
+    * The wrap is game code. The grid reports cells outside the map as empty, so
+    * a body leaving the map keeps falling. 'place' moves the body without
+    * interpolation, and a body re-entering the map collides with tiles
+    * normally.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
 
 const TILE_SIZE = 32;
 
-/* The same room as the main demo, with its floor and its ceiling taken out, and
-   one ledge added up in the corner that nothing can reach from below. */
+/* The demo room without floor and ceiling, plus a ledge in the top left corner
+   that cannot be reached from below. */
 const LEGEND = [
     '#.......................#',
     '#...####................#',
@@ -47,11 +44,11 @@ const player = engine.spawn(3 * TILE_SIZE, 11 * TILE_SIZE - 28, 20, 28);
 const viewWidth = world.columns * TILE_SIZE;
 const viewHeight = world.rows * TILE_SIZE;
 
-/* The prize, on the ledge that only the fall can reach. */
+/* Prize sensor, on the corner ledge. */
 const prize = engine.addSensor(5 * TILE_SIZE, TILE_SIZE - 20, 16, 16, 'prize');
 
 /**
-    * @type {number} times round.
+    * @type {number} number of wraps.
 */
 let laps = 0;
 
@@ -70,13 +67,12 @@ player.body.onSensor = (sensor, entering) => {
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -137,7 +133,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -153,12 +149,9 @@ function frame(now) {
     previous = now;
 
     /*
-        * This is the whole mechanic. The body is put back by exactly the height of
-        * the room, so it keeps whatever fraction of a pixel it had fallen past the
-        * edge and the wrap is not a step. It uses 'place' rather than an
-        * assignment, because the position the character is drawn from has to come
-        * with it. Otherwise for one frame it is drawn somewhere down the middle of
-        * the screen, on its way.
+        * Moves the body up by exactly the room height, keeping the sub pixel
+        * offset past the edge. 'place' is used instead of assigning y, otherwise
+        * the frame would be interpolated across the whole room.
     */
     const body = player.body;
     if (body.y > viewHeight) {
@@ -172,9 +165,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the prize, and the character. When the character is close to
-    * an edge it is drawn a second time on the far side, so that the wrap reads as
-    * continuous rather than as a disappearance.
+    * Draws the room, the prize and the character. Near an edge the character is
+    * drawn a second time on the opposite side, so the wrap is continuous.
 */
 function draw() {
     const body = player.body;
@@ -197,7 +189,7 @@ function draw() {
         }
     }
 
-    /* The open edges, marked so the room does not look merely unfinished. */
+    /* Markers for the open edges. */
     context.strokeStyle = '#ccc';
     context.setLineDash([6, 6]);
     context.beginPath();
@@ -229,7 +221,7 @@ function draw() {
 }
 
 /**
-    * Draws the character at a given spot.
+    * Draws the character at the given position.
     *
     * @param {number} x left edge.
     * @param {number} y top edge.
@@ -244,7 +236,7 @@ function paint(x, y) {
 }
 
 /**
-    * Says how far round and whether the corner has been taken.
+    * Writes the wrap count and whether the prize was taken.
 */
 function report() {
     readout.innerHTML =

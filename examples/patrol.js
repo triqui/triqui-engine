@@ -1,23 +1,21 @@
 /**
-    * @file patrol.js, characters that are not you.
+    * @file patrol.js, non player characters driven by 'think'.
     *
-    * There are four of them, and none has a keyboard: a walker that turns at walls,
-    * a watcher that will not step off a ledge, a hopper that jumps the moment it
-    * lands, and a follower that comes after you when it can see you.
+    * Four enemies use four behaviours: a walker that turns at walls, a watcher
+    * that turns at ledges, a hopper that jumps as soon as it lands, and a
+    * follower that chases the player when it has line of sight.
     *
-    * All four are the same thing the player is: a body, a controller and an input
-    * object. What differs is who fills the input in. Each has a 'think', which the
-    * engine calls once per physics step rather than once per frame, so their
-    * reflexes do not depend on the refresh rate.
+    * Each enemy is a body, a controller and an input object, like the player.
+    * Its 'think' function writes the input. The engine calls 'think' once per
+    * physics step, not once per frame, so behaviour does not depend on the
+    * refresh rate.
     *
-    * What a mind reads is state, not events: 'grounded', 'touching', 'fallSpeed',
-    * 'state', 'facing'. The frame's 'just' flags are cleared at the top of the
-    * frame and would be empty by the time it ran. An edge that a mind needs, such
-    * as the moment of landing here, is either kept as a line of its own memory or
-    * taken from 'onCollision', which fires the instant it happens.
+    * 'think' reads state ('grounded', 'touching', 'fallSpeed', 'state',
+    * 'facing'), not events. The 'just' flags are per frame and are cleared
+    * before the steps run. To detect a transition such as landing, 'think' keeps
+    * its own previous value, or uses 'onCollision'.
     *
-    * Looking ahead is a cast: the same raycast2d the collider uses, asked a
-    * question the collider never asks.
+    * Ledge detection is a single downward cast with 'world.raycaster'.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -43,7 +41,7 @@ const LEGEND = [
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * @type {number} how far the follower can see.
+    * @type {number} follower sight distance, in pixels.
 */
 const SIGHT = 300;
 
@@ -52,15 +50,13 @@ const engine = new TriquiEngine(world);
 const player = engine.spawn(2 * TILE_SIZE, 14 * TILE_SIZE - 28, 20, 28);
 
 /**
-    * Asks whether there is still ground just beyond a character's leading edge.
+    * Whether there is ground just past a character's leading edge.
     *
-    * One cast, straight down from a point past the toes. It is the oldest
-    * question in the genre and the collider has no reason to ask it, so it is
-    * asked here, of the world's own caster.
+    * Casts one ray downwards from a point in front of the feet.
     *
     * @param {object} body   the character.
-    * @param {number} facing which way it is going.
-    * @returns {boolean} true when it can keep walking.
+    * @param {number} facing direction of travel.
+    * @returns {boolean} true when there is ground ahead.
 */
 function groundAhead(body, facing) {
     const x = facing > 0 ? body.x + body.width + 2 : body.x - 2;
@@ -69,10 +65,10 @@ function groundAhead(body, facing) {
 }
 
 /**
-    * Turns a character round when it meets a wall.
+    * Reverses a character's direction when it touches a wall.
     *
     * @param {object} controller the character.
-    * @returns {number} which way it should now be going.
+    * @returns {number} the new direction.
 */
 function turnAtWalls(controller) {
     const body = controller.body;
@@ -89,7 +85,7 @@ function turnAtWalls(controller) {
     * @param {number} col column of the tile to stand on.
     * @param {number} row row of that tile.
     * @param {object} [tuning] overrides for this character.
-    * @returns {object} a controller, standing on that tile.
+    * @returns {object} a controller, placed on that tile.
 */
 function place(col, row, tuning) {
     return engine.spawn(col * TILE_SIZE, row * TILE_SIZE - 26, 18, 26, tuning);
@@ -122,9 +118,9 @@ watcher.think = controller => {
 const hopper = place(8, 3, { runSpeed: 70, jumpSpeed: 430 });
 
 /**
-    * @type {boolean} whether the hopper was in the air last step. A mind keeping
-    *                 its own memory of an edge, because the frame's flags are not
-    *                 its to read.
+    * @type {boolean} whether the hopper was airborne in the previous step. Used
+    *                 to detect landing inside 'think', where the per frame flags
+    *                 are not reliable.
 */
 let hopperWasFlying = false;
 
@@ -146,8 +142,8 @@ hopper.think = controller => {
 const follower = place(20, 12, { runSpeed: 120, jumpSpeed: 500 });
 
 /**
-    * @type {boolean} whether the follower could see the player last step, kept for
-    *                 the drawing.
+    * @type {boolean} whether the follower could see the player in the last step,
+    *                 for drawing.
 */
 let seen = false;
 
@@ -176,8 +172,8 @@ follower.think = controller => {
         controller.input.left = toX < 0 ? 1 : 0;
     }
 
-    /* Jump when the way is blocked or the prey is above, and let go on the way
-       down so the hop is only as big as it needs to be. */
+    /* Jump when blocked or when the player is above, and release on the way
+       down for a short hop. */
     const blocked = body.touching.left || body.touching.right;
     if (body.grounded && (blocked || toY < -TILE_SIZE)) {
         controller.input.jumpPressed = true;
@@ -198,13 +194,12 @@ const minds = [
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -262,7 +257,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -283,7 +278,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the line of sight when there is one, and everybody.
+    * Draws the room, the line of sight when present, and the characters.
 */
 function draw() {
     const alpha = engine.alpha;
@@ -324,8 +319,8 @@ function draw() {
 }
 
 /**
-    * Draws one character, filled if it is the player and hollow if it is not,
-    * with a notch on the side it is facing.
+    * Draws one character, filled for the player and hollow for enemies, with a
+    * facing notch.
     *
     * @param {object}  body    the body to draw.
     * @param {boolean} isYou   whether this one is the player.
@@ -346,7 +341,7 @@ function paint(body, isYou) {
 }
 
 /**
-    * One line per mind, saying which way it is going and what it is doing.
+    * Writes one line per enemy with its direction and state.
 */
 function report() {
     readout.innerHTML = minds.map(mind => {

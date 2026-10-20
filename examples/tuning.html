@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>triqui - the numbers, with your hands on them</title>
+<title>triqui - tuning at runtime</title>
 <style>
 * { box-sizing: border-box; }
 
@@ -105,13 +105,8 @@ button:hover { background: #f0f0f0; }
 </head>
 <body>
 <main>
-    <h1>triqui - the numbers, with your hands on them</h1>
-    <p class="intro">
-        The room works like a ruler: four bars at two, three, four and five tiles above the floor,
-        and two gaps in it at two and three tiles wide. The default character clears the
-        lowest bar and both gaps and nothing else. Drag anything and the very next physics
-        step already runs on the new number. There is nothing to rebuild, because the
-        tuning is a plain object read at the top of every step.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
+    <h1>triqui - tuning at runtime</h1>
+    <p class="intro">Four bars at two, three, four and five tiles above the floor, and two gaps two and three tiles wide. With the default tuning the character reaches only the first bar and clears both gaps. Slider changes apply on the next physics step, because the tuning object is read at the start of every step.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
 
     <canvas id="view" width="800" height="448"></canvas>
     <div class="panel" id="controls"></div>

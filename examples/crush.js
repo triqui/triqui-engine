@@ -1,17 +1,15 @@
 /**
-    * @file crush.js, what happens when the level closes on you.
+    * @file crush.js, pushing and crushing by moving platforms.
     *
-    * A press coming down in the middle and a piston sweeping the right hand side.
+    * A press moves up and down in the middle of the room and a piston moves
+    * horizontally on the right.
     *
-    * Neither of them kills on contact. A platform that reaches a character shoves
-    * it the way it is going and just far enough to be clear: clip the press with
-    * your head on the way up and it knocks you down, walk into the piston and it
-    * sweeps you along in front of it. Being crushed is what is left when the shove
-    * has nowhere to put you, either under the press with the floor below or in
-    * front of the piston with the wall behind.
-    *
-    * That distinction is the whole point of the example. Something moving into you
-    * is ordinary; having nowhere left to be is not.
+    * Contact alone is not fatal. A platform that moves into a character pushes it
+    * in the direction of travel, by the overlap distance: hitting the press from
+    * below pushes the character down, and walking into the piston pushes the
+    * character ahead of it. A character is crushed only when the push cannot
+    * clear it, under the press against the floor or between the piston and the
+    * wall. 'onCrushed' reports it.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -44,42 +42,37 @@ const engine = new TriquiEngine(world);
 const player = engine.spawn(SPAWN_X, SPAWN_Y, 20, 28);
 
 /*
-    * The press stops eight pixels above the floor, which is less than the
-    * character is tall: that is the entire difference between a hazard and a
-    * doorway.
+    * The press stops eight pixels above the floor, less than the character
+    * height, so a character under it is crushed.
     *
-    * Where it stops going up matters just as much, and less obviously. Send it
-    * flush to the ceiling and its top face is a death trap too. Anybody riding it
-    * is carried head first into the roof, the carry stops them there, the press
-    * keeps coming, and they end up inside it. Riding a lift should not be the same
-    * mistake as standing under a press, so it stops a character's height clear of
-    * the ceiling and the top of it is simply a lift.
+    * At the top it stops one character height below the ceiling. If it reached
+    * the ceiling, a character riding on top would be carried into the ceiling
+    * and crushed as well. With the gap, the top of the press works as a lift.
 */
 const press = engine.addPlatform(10 * TILE_SIZE, 4 * TILE_SIZE, 160, 24, {
     points: [{ x: 10 * TILE_SIZE, y: 13 * TILE_SIZE }],
     speed: 150,
 });
 
-/* The piston sweeps you towards the wall and stops eight pixels short of it,
-   which is narrower than the character. Walking into it is safe; being at the
-   far end when it arrives is not. */
+/* The piston stops eight pixels from the wall, less than the character width,
+   so a character pushed against the wall is crushed. */
 const piston = engine.addPlatform(20 * TILE_SIZE, 12 * TILE_SIZE, 24, 64, {
     points: [{ x: 23 * TILE_SIZE, y: 12 * TILE_SIZE }],
     speed: 110,
 });
 
 /**
-    * @type {number} how many times the level has won.
+    * @type {number} number of times the character was crushed.
 */
 let losses = 0;
 
 /**
-    * @type {string} what got you last, for the panel.
+    * @type {string} what crushed the character last, for the readout.
 */
 let lastCulprit = 'nothing yet';
 
 /**
-    * @type {number} frames left of the flash that marks a death.
+    * @type {number} remaining frames of the flash shown after a crush.
 */
 let flash = 0;
 
@@ -88,8 +81,8 @@ player.body.onCrushed = what => {
     flash = 12;
     lastCulprit = what === press ? 'the press' : what === piston ? 'the piston' : 'the level';
 
-    /* place() rather than an assignment: it moves the remembered position too, so
-       the character is not drawn smeared across the room on the way back. */
+    /* place() also resets the previous position, so the respawn is not
+       interpolated. */
     player.body.place(SPAWN_X, SPAWN_Y);
     player.body.velocityX = 0;
     player.body.velocityY = 0;
@@ -98,13 +91,12 @@ player.body.onCrushed = what => {
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -162,7 +154,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -186,7 +178,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the machinery and the character.
+    * Draws the room, the press, the piston and the character.
 */
 function draw() {
     const alpha = engine.alpha;

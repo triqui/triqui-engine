@@ -1,15 +1,16 @@
 /**
-    * @file oneway.js, decks you can only meet from one side.
+    * @file oneway.js, one way platforms.
     *
-    * A tower of them, stacked straight up. Ordinary floors could not be arranged
-    * like this, because two rows of clearance is barely more than the character is
-    * tall, and every jump would bang its head on the one above. These are not there
-    * at all from below, so you go straight up through each and land on top of it.
+    * The level is a vertical tower of one way platforms. With solid floors this
+    * layout would not work: two rows of clearance is barely taller than the
+    * character, so every jump would hit the platform above. One way platforms do
+    * not block from below, so the character jumps through each one and lands on
+    * it.
     *
-    * A tile is one way because its definition says so. The collider stops a body
-    * on one only when the body is coming at it feet first and is still outside
-    * it, and that single rule covers being jumped through, being walked into from
-    * the side, and being stood on.
+    * A tile is one way when its definition has 'oneWay: true'. The collider
+    * blocks a body on it only when the body moves towards it feet first from
+    * outside. That rule covers jumping through, walking in from the side and
+    * standing on it.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -37,8 +38,8 @@ const IDS = { '.': 0, '#': 1, '=': 2 };
 const MAP = LEGEND.map(row => [...row].map(char => IDS[char]));
 
 /**
-    * The one flag that makes a floor one way. It arrives on the contact as well,
-    * so a game can tell a deck from honest ground without asking twice.
+    * Tile definition for one way platforms. The flag is also available on
+    * contacts, through 'contact.tile'.
     *
     * @type {object}
 */
@@ -51,13 +52,12 @@ const player = engine.spawn(7 * TILE_SIZE, 14 * TILE_SIZE - 28, 20, 28);
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -113,14 +113,14 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * @type {number} the highest deck reached, counting from the floor.
+    * @type {number} highest platform reached, counted from the floor.
 */
 let best = 0;
 
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -148,8 +148,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the tower. The decks are drawn as thin bars rather than full cells, to
-    * say by their shape that they are floors and not blocks.
+    * Draws the tower. One way platforms are drawn as thin bars instead of full
+    * cells.
 */
 function draw() {
     const body = player.body;

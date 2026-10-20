@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>triqui - clemency you can see</title>
+<title>triqui - hurtbox</title>
 <style>
 * { box-sizing: border-box; }
 
@@ -47,13 +47,8 @@ canvas {
 </head>
 <body>
 <main>
-    <h1>triqui - clemency you can see</h1>
-    <p class="intro">
-        The white rectangle inside you is the part that can be hurt; the black outline is the
-        part walls see. Two turrets fire at head height, where those few pixels decide
-        everything, and one at chest height, which has to be jumped regardless.
-        <strong>H</strong> switches the clemency off. Spikes forgive a brush, coins do not:
-        hazards narrower than they look, rewards wider.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
+    <h1>triqui - hurtbox</h1>
+    <p class="intro">The white rectangle is the hurtbox; the black outline is the body used for walls and floors. Two turrets fire at head height, where the inset decides whether a shot hits, and one at chest height, which must be jumped. <strong>H</strong> toggles the inset. Spikes are tested against the hurtbox, coins against the full body.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
 
     <div class="readout" id="readout"></div>
     <canvas id="view" width="800" height="448"></canvas>

@@ -1,9 +1,9 @@
 /**
-    * @file levels.mjs, runs the reachability check on every level meant to be
-    * climbed with the ordinary jump.
+    * @file levels.mjs, runs the reachability check on every level designed for
+    * the default jump.
     *
-    * The list is the set that passes today. A level added to it must pass; one
-    * taken off it needs a reason in the example's header. See examples/AGENTS.md.
+    * Every level in the list must pass. Removing a level from the list requires
+    * a reason in the example header. See examples/AGENTS.md.
 */
 
 import { spawnSync } from 'node:child_process';

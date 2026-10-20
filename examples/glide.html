@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>triqui - two ways of falling slowly</title>
+<title>triqui - gliding</title>
 <style>
 * { box-sizing: border-box; }
 
@@ -47,13 +47,8 @@ canvas {
 </head>
 <body>
 <main>
-    <h1>triqui - two ways of falling slowly</h1>
-    <p class="intro">
-        Ride the lift, walk to the end of the ledge, step off and hold <strong>J</strong>.
-        The pad is fourteen tiles away: you will not reach it falling and you will reach it
-        gliding. <strong>1</strong> caps the falling speed, <strong>2</strong> weakens
-        gravity. Nothing was added to the engine for either of them, because they are the character's own
-        numbers set while a button is down.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
+    <h1>triqui - gliding</h1>
+    <p class="intro">Take the lift, walk to the end of the ledge, step off and hold <strong>J</strong>. The pad cannot be reached with a normal fall. <strong>1</strong> caps the fall speed and <strong>2</strong> reduces gravity. Both variants only change the character tuning while the button is held.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
 
     <div class="readout" id="readout"></div>
     <canvas id="view" width="800" height="480"></canvas>

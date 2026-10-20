@@ -1,16 +1,15 @@
 /**
-    * @file dropthrough.js, going back down a tower of one way decks.
+    * @file dropthrough.js, dropping through one way platforms.
     *
-    * You start at the top. Down, or S, lets go of whatever deck is under your
-    * feet; everything else is the same tower as the one way example.
+    * The character starts at the top of the tower from the one way example. Down
+    * or S drops through the platform under the feet.
     *
-    * Holding down does not move the character. It sets a timer on the body, and
-    * while the timer runs the collider stops treating one way geometry as a floor,
-    * for that body only. The timer needs to survive a single step: once the feet
-    * are past the surface the collider works out on its own that the body is
-    * through, and gravity does the rest.
+    * Pressing down sets 'body.dropTimer'. While it is above
+    * zero the collider does not treat one way tiles as ground for that body. It
+    * only needs to last one step: once the feet are below the surface, the
+    * collider no longer sees the platform as ground.
     *
-    * The bar in the panel is that timer, running out.
+    * The bar in the readout shows the timer.
 */
 
 import { TriquiWorld, TriquiEngine, DEFAULT_TUNING } from '../src/triqui.js';
@@ -45,13 +44,12 @@ const player = engine.spawn(7 * TILE_SIZE, 2 * TILE_SIZE - 28, 20, 28);
 const keys = { left: 0, right: 0, down: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -113,14 +111,14 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * @type {number} how many decks have been dropped through.
+    * @type {number} number of platforms dropped through.
 */
 let dropped = 0;
 
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -136,7 +134,7 @@ function frame(now) {
     engine.advance((now - previous) / 1000);
     previous = now;
 
-    /* Letting go of a deck is leaving the ground while the timer is running. */
+    /* A drop is counted when the body leaves the ground while the timer runs. */
     if (player.body.justLeftGround && player.body.dropTimer > 0) {
         dropped++;
     }
@@ -169,8 +167,7 @@ function draw() {
                 context.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
             }
             if (id === 2) {
-                /* A deck being let go of is drawn hollow, to show which rule is
-                   in force. */
+                /* Platforms are drawn hollow while the drop timer runs. */
                 context.fillStyle = body.dropTimer > 0 ? '#ccc' : '#555';
                 context.fillRect(x, y, TILE_SIZE, 4);
             }
@@ -186,7 +183,7 @@ function draw() {
 }
 
 /**
-    * Shows the drop timer as a bar of characters, and the tally.
+    * Writes the drop timer as a text bar, and the drop count.
 */
 function report() {
     const body = player.body;

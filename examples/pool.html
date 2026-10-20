@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>triqui - the same six characters, over and over</title>
+<title>triqui - character pooling</title>
 <style>
 * { box-sizing: border-box; }
 
@@ -47,13 +47,8 @@ canvas {
 </head>
 <body>
 <main>
-    <h1>triqui - the same six characters, over and over</h1>
-    <p class="intro">
-        They drop in from the top. Shoot one with <strong>K</strong>, or let it fall through
-        the gap, and it goes back on the shelf along the top instead of being destroyed.
-        It is taken out with <strong>remove</strong> and put back later with <strong>add</strong>.
-        Six are built when the page loads, and the panel will say six for as long as you
-        leave it open.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
+    <h1>triqui - character pooling</h1>
+    <p class="intro">Enemies drop in from the top. An enemy shot with <strong>K</strong> or fallen through the gap is removed with <strong>remove</strong> and stored in the pool shown at the top, then re-added later with <strong>add</strong>. Six enemies are created at load time and no more are ever created.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
 
     <div class="readout" id="readout"></div>
     <canvas id="view" width="800" height="448"></canvas>

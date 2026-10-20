@@ -1,21 +1,18 @@
 /**
-    * @file glide.js, two ways of falling slowly, and what each feels like.
+    * @file glide.js, gliding by changing tuning at runtime.
     *
-    * Take the lift, walk out to the end of the ledge, step off and hold J. The
-    * pad on the far side is four hundred pixels away and eight below: you will not
-    * reach it falling, and you will reach it gliding.
+    * Take the lift, walk to the end of the ledge, step off and hold J. The pad on
+    * the far side is out of reach with a normal fall and within reach when
+    * gliding.
     *
-    * Nothing was added to the engine for this. The numbers that decide how a
-    * character falls live on the character, in a plain object read at the top of
-    * every step, so a glide is a few of them set while a button is down and put
-    * back when it is not. One character in the room gliding does not make anybody
-    * else glide, and there is nothing to switch on or rebuild.
+    * The engine has no glide feature. Tuning is a per character object read at
+    * the start of every step, so gliding sets some of its values while the
+    * button is held and restores them on release. Other characters are not
+    * affected.
     *
-    * The two kinds are worth having both. A cap on the falling speed is a
-    * parachute: you speed up as usual and then hold at a rate, which is predictable
-    * and lands where you aim. Weaker gravity is a leaf: you keep gathering speed,
-    * only slowly, so the arc keeps steepening. The idea is the same, but the two
-    * feel quite different to fly.
+    * Two variants are provided. Capping 'maxFallSpeed' gives a constant descent
+    * rate after a short acceleration. Reducing gravity keeps the character
+    * accelerating, more slowly, so the trajectory keeps getting steeper.
 */
 
 import { TriquiWorld, TriquiEngine, DEFAULT_TUNING } from '../src/triqui.js';
@@ -41,8 +38,8 @@ const LEGEND = [
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * The two ways, each only a couple of the character's own numbers set
-    * differently while the button is down.
+    * The two glide variants. Each one changes a few tuning values while the
+    * button is held.
     *
     * @type {Array<{name: string, key: string, about: string, apply: Function}>}
 */
@@ -69,47 +66,46 @@ const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
 const player = engine.spawn(2 * TILE_SIZE, 14 * TILE_SIZE - 28, 20, 28);
 
-/* The way up is a lift rather than a staircase, so that the room is only about
-   the way down. */
+/* A lift takes the character up, so the level only tests the descent. */
 engine.addPlatform(TILE_SIZE, 13 * TILE_SIZE, 64, 12, {
     points: [{ x: TILE_SIZE, y: 3 * TILE_SIZE }],
     speed: 90,
 });
 
 /**
-    * @type {number} which of the two is chosen.
+    * @type {number} index of the selected variant.
 */
 let glide = 0;
 
 /**
-    * @type {boolean} whether the button is down and the character is falling.
+    * @type {boolean} whether the button is held and the character is falling.
 */
 let gliding = false;
 
 /**
-    * @type {{x: number, y: number}} where this flight started.
+    * @type {{x: number, y: number}} start position of the current flight.
 */
 let launched = { x: 0, y: 0 };
 
 /**
-    * @type {number} how far the last flight carried, across and down.
+    * @type {number} distance covered by the last flight.
 */
 let carried = 0;
 
 /**
-    * @type {number} how many times the pad has been landed on.
+    * @type {number} number of landings on the pad.
 */
 let arrivals = 0;
 
 /**
-    * @type {Array<{x: number, y: number}>} where the character has been this
-    *                                       flight, for the trail.
+    * @type {Array<{x: number, y: number}>} positions of the current flight, for
+    *                                       drawing the trail.
 */
 const trail = [];
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
     * @param {object} event the key event.
 */
@@ -179,7 +175,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const body = player.body;
@@ -193,9 +189,8 @@ function frame(now) {
     keys.jumpPressed = false;
 
     /*
-        * This is all of it. Put the two numbers back first, then let the chosen
-        * glide set what it wants, so that switching kind in mid air does not leave
-        * the other one's settings behind.
+        * Restore both values first, then apply the selected variant, so switching
+        * variant in the air does not leave the other variant's values set.
     */
     gliding = keys.glide && !body.grounded && body.fallSpeed > 0;
     player.tuning.maxFallSpeed = DEFAULT_TUNING.maxFallSpeed;
@@ -229,7 +224,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the lift, the trail of this flight and the character.
+    * Draws the room, the lift, the flight trail and the character.
 */
 function draw() {
     const body = player.body;
@@ -281,7 +276,7 @@ function draw() {
     context.fillStyle = body.grounded ? '#fff' : '#000';
     context.fillRect(drawX + (body.facing > 0 ? body.width - 5 : 0), drawY + 7, 5, 6);
 
-    /* The wings, so that holding the button reads as doing something. */
+    /* Wings, drawn while gliding. */
     if (gliding) {
         context.strokeStyle = '#000';
         context.lineWidth = 2;
@@ -294,8 +289,7 @@ function draw() {
 }
 
 /**
-    * Says what is chosen, how fast it is falling, and how far the last flight
-    * carried.
+    * Writes the selected variant, the fall speed and the last flight distance.
 */
 function report() {
     const kind = GLIDES[glide];

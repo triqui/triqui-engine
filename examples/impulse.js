@@ -1,21 +1,19 @@
 /**
-    * @file impulse.js, jumps you charge and floors that throw you.
+    * @file impulse.js, charged jumps and springs built with impulses.
     *
-    * Two things the engine does not have an opinion about, both written from the
-    * game side with one method.
+    * Both features are game code that uses a single engine method.
     *
-    * Holding C winds up a jump and letting go spends it, which the built in jump
-    * cannot do because it decides its own height the instant it starts. Zeroing
-    * 'jumpSpeed' takes it out of the way and leaves the whole jump to this file.
+    * Holding C charges a jump and releasing C performs it. The built in jump
+    * cannot do this because its speed is fixed when it starts, so 'jumpSpeed' is
+    * set to zero and the jump is implemented here.
     *
-    * The grey tiles are springs. They push back from inside the collision they
-    * caused: the contact says which tile was met and the impulse goes out before
-    * the callback returns, which works because by then the body's velocity has
-    * already been settled by the collider and is there to be changed.
+    * The grey tiles are springs. 'onCollision' checks the tile definition and
+    * applies an impulse. This works inside the callback because the collider has
+    * already updated the body velocity when the callback runs.
     *
-    * Both push with 'impulseAligned', which means across gravity and against it
-    * rather than in x and y. Turn the world with G and the spring still throws you
-    * off itself instead of upwards.
+    * Both use 'impulseAligned', which is relative to gravity instead of the
+    * world axes. After rotating gravity with G, springs still push away from
+    * their surface.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -40,13 +38,13 @@ const LEGEND = [
 ];
 
 /**
-    * @type {object} what each character in the map means.
+    * @type {object} tile identifier for each legend character.
 */
 const IDS = { '.': 0, '#': 1, o: 4 };
 
 /**
-    * Springs are ordinary solid tiles as far as the collider is concerned. What
-    * makes them springs is this flag, which comes back on the contact.
+    * Spring tiles are ordinary solid tiles for the collider. The 'spring' flag
+    * is read back from the contact.
     *
     * @type {object}
 */
@@ -55,18 +53,18 @@ const DEFINITIONS = { 4: { spring: true } };
 const MAP = LEGEND.map(row => [...row].map(char => IDS[char]));
 
 /**
-    * @type {number} how hard a spring throws.
+    * @type {number} spring impulse speed.
 */
 const SPRING = 720;
 
 /**
-    * @type {number} the weakest a charged jump can be, and the strongest.
+    * @type {number} minimum and maximum charged jump speed.
 */
 const CHARGE_FLOOR = 260;
 const CHARGE_CEILING = 760;
 
 /**
-    * @type {number} how long holding takes to go from one to the other.
+    * @type {number} time to charge from minimum to maximum, in seconds.
 */
 const CHARGE_TIME = 0.9;
 
@@ -80,8 +78,7 @@ const GRAVITY_DIRECTIONS = [
 const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE, definitions: DEFINITIONS });
 const engine = new TriquiEngine(world);
 
-/* The ordinary jump is taken out of the way: this character's only jump is the
-   one this file gives it. */
+/* The built in jump is disabled; this file implements the jump. */
 const player = engine.spawn(2 * TILE_SIZE, 13 * TILE_SIZE, 20, 28, { jumpSpeed: 0 });
 
 player.body.onCollision = contact => {
@@ -91,7 +88,7 @@ player.body.onCollision = contact => {
 };
 
 /**
-    * @type {number} how long the jump has been wound up for, in seconds.
+    * @type {number} charge time, in seconds.
 */
 let charge = 0;
 
@@ -103,13 +100,12 @@ let gravityAt = 0;
 const keys = { left: 0, right: 0, charging: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -146,7 +142,7 @@ addEventListener('keyup', event => {
         keys.right = 0;
     }
     if (event.code === 'KeyC' || event.code === 'Space') {
-        /* Letting go is the jump. Nothing in the engine knows this key exists. */
+        /* The jump happens on release. The engine does not handle this key. */
         if (keys.charging && player.body.grounded) {
             player.body.impulseAligned(0, strength());
         }
@@ -163,7 +159,7 @@ addEventListener('blur', () => {
 });
 
 /**
-    * @returns {number} how hard the jump would be if let go of now.
+    * @returns {number} jump speed for the current charge.
 */
 function strength() {
     const wound = Math.min(1, charge / CHARGE_TIME);
@@ -185,7 +181,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const elapsed = (now - previous) / 1000;
@@ -194,7 +190,7 @@ function frame(now) {
     player.input.left = keys.left;
     player.input.right = keys.right;
 
-    /* Winding up only counts while there is something to push off. */
+    /* Charging only progresses while grounded. */
     if (keys.charging && player.body.grounded) {
         charge = Math.min(CHARGE_TIME, charge + elapsed);
     }
@@ -206,8 +202,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the springs as thicker bars, and the character squatting
-    * lower the longer the jump has been wound up.
+    * Draws the room, the springs, and the character, which gets shorter as the
+    * charge increases.
 */
 function draw() {
     const body = player.body;
@@ -250,7 +246,7 @@ function draw() {
 }
 
 /**
-    * Shows the wind up as a bar, and what letting go would be worth.
+    * Writes the charge as a text bar and the resulting jump speed.
 */
 function report() {
     const full = 16;

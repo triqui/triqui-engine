@@ -1,17 +1,14 @@
 /**
-    * @file wallslide.js, falling slowly by holding on.
+    * @file wallslide.js, wall sliding.
     *
-    * The level is a deep shaft with nothing in it. Fall down the middle and you
-    * arrive at terminal speed; hold into either wall on the way down and you arrive
-    * gently.
+    * The level is an empty vertical shaft. Falling down the middle reaches
+    * 'maxFallSpeed'; pushing towards a wall limits the fall speed to
+    * 'wallSlideSpeed'.
     *
-    * Sliding is not a force and costs nothing to work out: it is a limit on the
-    * falling half of the velocity, in force only while the character is being
-    * steered into the wall it is against. Let go of the direction and you let go
-    * of the wall, which is the whole of the control.
+    * Wall sliding caps the velocity component along gravity and applies no
+    * force. It is active only while the input pushes towards the touched wall.
     *
-    * Wall jumping is off here on purpose. The two arrive together in most games
-    * and are separate things: this one is only the brake.
+    * Wall jumps are disabled in this example to show wall sliding on its own.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -40,8 +37,8 @@ const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
 
 /**
-    * What this character can do that a plain one cannot. Everything here is off
-    * by default in the engine: abilities are given, not assumed.
+    * Tuning overrides that enable this example's abilities. All abilities are
+    * disabled in the default tuning.
     *
     * @type {object}
 */
@@ -55,13 +52,12 @@ const keys = { left: 0, right: 0, up: 0, down: 0, jump: false, jumpPressed: fals
     dash: false, dashPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -145,14 +141,14 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * @type {number} the fastest this run has fallen.
+    * @type {number} highest fall speed in the current attempt.
 */
 let fastest = 0;
 
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -184,8 +180,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the level and the character, the character marked with what it is
-    * doing at that moment.
+    * Draws the level and the character, with a marker for its current state.
 */
 function draw() {
     const body = player.body;
@@ -216,14 +211,13 @@ function draw() {
     context.fillRect(drawX, drawY, body.width, body.height);
     context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
-    /* A notch on the side it is looking, which the engine keeps for us because a
-       dash with no direction held has to go somewhere. */
+    /* Facing notch, from 'body.facing'. */
     context.fillStyle = '#000';
     context.fillRect(drawX + (body.facing > 0 ? body.width - 4 : 0), drawY + 6, 4, 5);
 }
 
 /**
-    * Writes out what the character has left and what it is doing.
+    * Writes the remaining abilities and the current state to the readout.
 */
 function report() {
     readout.innerHTML = [

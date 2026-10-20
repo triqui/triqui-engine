@@ -1,20 +1,18 @@
 /**
-    * @file gravity.js, turning the world instead of the character.
+    * @file gravity.js, rotating gravity.
     *
-    * Six plates to stand on, on all four walls of the room. Two of them are on
-    * the ceiling and one on each side, so the only way round is to change which
-    * way down points.
+    * Six plates are placed on the four walls of the room. Two are on the ceiling
+    * and one on each side wall, so reaching all of them requires rotating
+    * gravity.
     *
-    * Nothing in the engine treats the floor as special. Gravity is a vector, and
-    * standing, running and jumping are all worked out from it: what counts as the
-    * ground is whichever face is pointing that way, running is across it, and a
-    * jump is against it. Turn it a quarter and the character walks up the wall it
-    * was falling past.
+    * Gravity is a vector, and ground detection, running and jumping are derived
+    * from it: the ground is the face in the gravity direction, the run axis is
+    * perpendicular to it, and jumps go against it. G rotates gravity by a
+    * quarter turn.
     *
-    * Running stays across gravity, which means the right hand key moves you
-    * clockwise round the room rather than always rightwards on the screen. That
-    * is the engine being consistent; a game that wants the other convention flips
-    * the input, not the physics.
+    * Because the run axis follows gravity, the right key moves the character
+    * clockwise around the room, not always to the right of the screen. A game
+    * that wants screen relative controls must remap the input.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -35,7 +33,7 @@ const LEGEND = [
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * The four ways down can point.
+    * The four gravity directions.
     *
     * @type {Array<{name: string, x: number, y: number}>}
 */
@@ -53,7 +51,7 @@ const engine = new TriquiEngine(world);
 const player = engine.spawn(2 * TILE_SIZE, 8 * TILE_SIZE - 28, 20, 28);
 
 /**
-    * A plate against each wall, two of them out of reach of any one gravity.
+    * Plates on every wall. No single gravity direction reaches all of them.
     *
     * @type {object[]}
 */
@@ -67,7 +65,7 @@ const plates = [
 ];
 
 /**
-    * @type {Set<object>} the plates that have been stood on.
+    * @type {Set<object>} plates already visited.
 */
 const reached = new Set();
 
@@ -78,20 +76,19 @@ player.body.onSensor = (sensor, entering) => {
 };
 
 /**
-    * @type {number} which direction gravity is pointing.
+    * @type {number} index of the current gravity direction.
 */
 let at = 0;
 
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -156,7 +153,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -181,8 +178,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the plates, and the character with a mark on whichever side
-    * of it is currently its feet.
+    * Draws the room, the plates, and the character with a marker on the face
+    * that points in the gravity direction.
 */
 function draw() {
     const body = player.body;
@@ -221,8 +218,7 @@ function draw() {
     context.fillRect(drawX, drawY, body.width, body.height);
     context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
-    /* A bar along whichever face is the feet, taken from the body's own down
-       vector rather than from anything this file decided. */
+    /* Feet marker, from the body's 'downX'/'downY'. */
     const thickness = 5;
     context.fillStyle = body.grounded ? '#fff' : '#000';
     context.fillRect(

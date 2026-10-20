@@ -1,14 +1,12 @@
 /**
-    * @file minimal.js, the least you can write and still have a platformer.
+    * @file minimal.js, the smallest complete setup.
     *
-    * A map, a world, an engine, a body, and a loop that hands the engine time and
-    * then draws. No abilities, no platforms, no sensors, nobody else in the room:
-    * everything Triqui can do beyond this is an addition to this shape, not a
-    * change to it.
+    * A map, a world, an engine, one character and a loop that advances the
+    * engine and draws. It uses no abilities, platforms or sensors. Every other
+    * example extends this structure.
     *
-    * The one luxury is R, which turns on the casts the collider made on the last
-    * step. Four out of each face that is leading, stopping the body at the nearest
-    * of them. That is the whole of the collision, and it is worth seeing once.
+    * R shows the rays cast by the collider in the last step: four from each
+    * leading face. The body stops at the nearest hit.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -31,7 +29,7 @@ const LEGEND = [
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * The editor's own colours, because a debug view is a thing you read.
+    * Colour palette, based on the Visual Studio Code dark theme.
     *
     * @type {object}
 */
@@ -48,8 +46,8 @@ const INK = {
 };
 
 /**
-    * @type {number} shortest a drawn ray may be. A step is a fraction of a pixel
-    *                long, so a ray drawn true to length would be invisible.
+    * @type {number} minimum drawn ray length. Rays cover a fraction of a pixel
+    *                per step, so they are lengthened to be visible.
 */
 const MIN_RAY_LENGTH = 11;
 
@@ -58,13 +56,12 @@ const engine = new TriquiEngine(world);
 const player = engine.spawn(48, 292, 20, 28);
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -104,7 +101,8 @@ addEventListener('keyup', event => {
     }
 });
 
-/* A key held while the window loses focus never sends its keyup. */
+/* Release all keys on blur: a key held while the window loses focus never
+   sends keyup. */
 addEventListener('blur', () => {
     Object.assign(player.input, { left: 0, right: 0, jump: false, jumpPressed: false });
 });
@@ -123,17 +121,16 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * One frame: give the engine the time that has passed, then draw.
+    * Advances the engine by the elapsed time and draws.
     *
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     engine.advance((now - previous) / 1000);
     previous = now;
 
     const body = player.body;
-    /* Drawn between the last two physics steps, or it moves in the jerks of the
-       fixed step instead of the line it is really travelling. */
+    /* Interpolated position, so movement does not stutter at the step rate. */
     const alpha = engine.alpha;
     const drawX = body.renderX(alpha);
     const drawY = body.renderY(alpha);
@@ -174,8 +171,7 @@ function frame(now) {
     context.fillStyle = body.grounded ? INK.standing : INK.flying;
     context.fillRect(drawX, drawY, body.width, body.height);
 
-    /* A notch on the side it is looking. The engine keeps the facing because a
-       dash with no direction held has to go somewhere; here it just shows. */
+    /* Facing notch, from 'body.facing'. */
     context.fillStyle = INK.facing;
     context.fillRect(drawX + (body.facing > 0 ? body.width - 5 : 0), drawY + 7, 5, 6);
 
@@ -183,13 +179,13 @@ function frame(now) {
 }
 
 /**
-    * Draws the casts of the last physics step, stretched to a readable minimum.
+    * Draws the casts of the last physics step, lengthened to a minimum length.
     *
-    * They were cast from where the body is and are drawn from where the body is
-    * drawn, a fraction of a step ahead, so that they stay attached to it.
+    * Rays are offset by the difference between the body position and its
+    * interpolated draw position, so they stay attached to the drawn body.
     *
-    * @param {number} offsetX distance between the body and its drawing.
-    * @param {number} offsetY distance between the body and its drawing.
+    * @param {number} offsetX draw position minus body position.
+    * @param {number} offsetY draw position minus body position.
 */
 function drawRays(offsetX, offsetY) {
     for (const ray of engine.collider.rays) {

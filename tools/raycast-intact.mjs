@@ -1,10 +1,10 @@
 /**
-    * @file raycast-intact.mjs, checks that raycast.js has not been touched.
+    * @file raycast-intact.mjs, verifies that raycast.js is unmodified.
     *
-    * raycast.js is a copy of triqui/raycast2d and is never edited here. Its
-    * checksum is pinned below; if it changes, either it was edited by mistake, or
-    * the library was updated upstream and copied in on purpose, in which case the
-    * new checksum goes here in the same commit.
+    * raycast.js is a verbatim copy of triqui/raycast2d and is never edited in
+    * this repository. Its SHA-256 checksum is pinned below. A mismatch means the
+    * file was edited, or replaced with a new upstream release; in the latter case
+    * update the checksum in the same commit.
 */
 
 import { createHash } from 'node:crypto';

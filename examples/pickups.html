@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>triqui - coins and water</title>
+<title>triqui - sensors</title>
 <style>
 * { box-sizing: border-box; }
 
@@ -47,8 +47,8 @@ canvas {
 </head>
 <body>
 <main>
-    <h1>triqui - coins and water</h1>
-    <p class="intro">Both are sensors, which detect overlaps without blocking movement. The pool shows why a sensor reports leaving as well as entering: without the exit, the character would keep swimming for the rest of the game. <strong>R</strong> puts the coins back.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
+    <h1>triqui - sensors</h1>
+    <p class="intro">Coins and water are sensors, which detect overlaps without blocking movement. The water uses both sensor events: entering applies the swimming tuning and leaving restores the default. <strong>R</strong> restores the coins.<br><a href="./minimal.html">minimal</a> · <a href="./tuning.html">tuning</a> · <a href="./shoot.html">shoot</a> · <a href="./glide.html">glide</a> · <a href="./hurtbox.html">hurtbox</a> · <a href="./pool.html">pool</a> · <a href="./feel.html">feel</a> · <a href="./chase.html">chase</a> · <a href="./patrol.html">patrol</a> · <a href="./dom.html">dom</a> · <a href="./contacts.html">contacts</a> · <a href="./platforms.html">platforms</a> · <a href="./oneway.html">one way</a> · <a href="./dropthrough.html">drop through</a> · <a href="./crush.html">crush</a> · <a href="./pickups.html">pickups</a> · <a href="./gravity.html">gravity</a> · <a href="./wallslide.html">wall slide</a> · <a href="./walljump.html">wall jump</a> · <a href="./airjump.html">air jumps</a> · <a href="./dash.html">dash</a> · <a href="./impulse.html">impulse</a> · <a href="./wrap.html">wrap</a></p>
 
     <div class="readout" id="readout"></div>
     <canvas id="view" width="800" height="480"></canvas>

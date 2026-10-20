@@ -1,11 +1,11 @@
 /**
-    * Triqui as a TypeScript project sees it: 'allowJs' and 'strict', with every
-    * type coming from the JSDoc in triqui.js.
+    * TypeScript consumer of Triqui with 'allowJs' and 'strict'. All types come
+    * from the JSDoc in triqui.js.
     *
-    * The first half must compile. The second half must not: each line under a
-    * '@ts-expect-error' is a mistake the types are there to catch, and if the
-    * types ever loosen enough to let one through, tsc reports the unused
-    * directive and this check fails. That is what keeps the JSDoc honest.
+    * The first section must compile. Each line in the second section, under a
+    * '@ts-expect-error' directive, must be a type error. If the types become too
+    * loose to reject one of them, tsc reports an unused directive and the check
+    * fails.
     *
     * Run with: npm run types
 */

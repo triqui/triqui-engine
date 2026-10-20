@@ -1,23 +1,18 @@
 /**
-    * @file tuning.js, the numbers, with your hands on them.
+    * @file tuning.js, editing tuning values at runtime.
     *
-    * Everything that decides how a character feels is a plain object on the
-    * character itself, read fresh at the top of every step. So there is nothing to
-    * rebuild and nothing to restart: the sliders write into 'player.tuning' and
-    * the next step is already different.
+    * Movement parameters are a plain object on each character, read at the start
+    * of every step. The sliders write into 'player.tuning' and the next step uses
+    * the new values, with nothing to rebuild.
     *
-    * The room works like a ruler. It has four bars at two, three, four and five
-    * tiles above the floor, and two gaps in the floor, two and three tiles wide.
-    * The default character reaches the first bar and no further, which is a
-    * statement about the numbers rather than about the engine. Change them and the
-    * same room asks a different question. Two jumps in the air will take you to the
-    * top of it; so will one jump of eight hundred, and so will halving the gravity.
+    * The room is a measuring layout: four bars at two, three, four and five tiles
+    * above the floor, and two gaps in the floor, two and three tiles wide. With
+    * the default tuning the character reaches only the first bar. Two air jumps,
+    * a jump speed of 800 or half the gravity are each enough to reach the top.
     *
-    * The figures under the sliders are worked out from the numbers rather than
-    * measured: a jump reaches its speed squared over twice the gravity, and stays
-    * up for twice its speed over the gravity, and in that time a run carries it
-    * as far as its speed will. Watching those three move while you drag is the
-    * quickest way to learn what any of them mean.
+    * The figures below the sliders are computed, not measured: jump height is
+    * jumpSpeed^2 / (2 * gravity), air time is 2 * jumpSpeed / gravity, and jump
+    * distance is runSpeed * air time.
 */
 
 import { TriquiWorld, TriquiEngine, DEFAULT_TUNING } from '../src/triqui.js';
@@ -45,8 +40,7 @@ const SPAWN_X = 2 * TILE_SIZE;
 const SPAWN_Y = 11 * TILE_SIZE - 28;
 
 /**
-    * The knobs, in the order they are worth turning. Everything here is a key of
-    * the tuning object and nothing else knows about them.
+    * Slider definitions. Each 'key' is a field of the tuning object.
     *
     * @type {Array<{key: string, label: string, min: number, max: number,
     *               step: number, unit: string}>}
@@ -71,8 +65,7 @@ const KNOBS = [
 ];
 
 /**
-    * These are complete characters for the same room. Each is only a handful of the
-    * numbers above set somewhere else.
+    * Preset characters. Each preset sets a few tuning values.
     *
     * @type {Array<{name: string, tuning: object}>}
 */
@@ -109,12 +102,12 @@ const controls = document.getElementById('controls');
 const figures = document.getElementById('figures');
 
 /**
-    * @type {object} the slider elements, by tuning key.
+    * @type {object} slider elements, by tuning key.
 */
 const sliders = {};
 
 /**
-    * @type {object} the elements showing each slider's value.
+    * @type {object} value label elements, by tuning key.
 */
 const values = {};
 
@@ -137,8 +130,8 @@ for (const knob of KNOBS) {
     value.className = 'knob-value';
 
     slider.addEventListener('input', () => {
-        /* This is all of it. The tuning is read at the top of every step, so the
-           next one already runs on the new number. */
+        /* Tuning is read at the start of every step, so the next step uses the
+           new value. */
         player.tuning[knob.key] = Number(slider.value);
         refresh();
     });
@@ -178,8 +171,8 @@ back.addEventListener('click', () => {
 buttons.append(back);
 
 /**
-    * Writes the value beside each slider, and the three figures that say what the
-    * numbers add up to.
+    * Updates the value labels and the computed jump height, air time and jump
+    * distance.
 */
 function refresh() {
     const tuning = player.tuning;
@@ -211,13 +204,12 @@ const keys = { left: 0, right: 0, up: 0, down: 0,
     jump: false, jumpPressed: false, dash: false, dashPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -300,7 +292,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -322,8 +314,7 @@ function frame(now) {
     engine.advance((now - previous) / 1000);
     previous = now;
 
-    /* Falling out of the world is possible with a low enough gravity and a wild
-       enough jump; the room puts you back rather than losing you. */
+    /* Extreme values can send the character out of the room; respawn it. */
     if (player.body.y > viewHeight + 200) {
         player.body.place(SPAWN_X, SPAWN_Y);
         player.body.velocityX = 0;
@@ -335,7 +326,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the height of each bar written beside it, and the character.
+    * Draws the room, the height label of each bar, and the character.
 */
 function draw() {
     const body = player.body;
@@ -362,8 +353,7 @@ function draw() {
     context.font = '11px ui-monospace, Menlo, Consolas, monospace';
     context.textAlign = 'left';
     context.textBaseline = 'middle';
-    /* Each bar says how far above the floor it is, so the room reads as a ruler
-       rather than as a level. */
+    /* Height of each bar above the floor, in tiles. */
     for (let index = 0; index < 4; index++) {
         const row = 9 - index;
         const col = 2 + index * 4;

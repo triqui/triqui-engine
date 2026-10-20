@@ -1,8 +1,9 @@
 /**
-    * @file nav.mjs, keeps the row of links on every example page the same.
+    * @file nav.mjs, generates the example links on every example page.
     *
-    * Every page carries the full list of examples, in the order below. Adding an
-    * example means adding it here and running this; nothing else edits the links.
+    * Every page contains links to all examples, in the order below. To add an
+    * example, add it to the list and run this script. The links are not edited
+    * by hand.
     *
     * Usage:
     *     node tools/nav.mjs           rewrite the links on every page
@@ -14,8 +15,8 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
-/* The order a reader meets them in: the basics, then the showpieces, then one
-   feature at a time. [file name without extension, label] */
+/* Reading order: basics, larger examples, then one feature per example.
+   [file name without extension, label] */
 export const EXAMPLES = [
     ['minimal', 'minimal'],
     ['tuning', 'tuning'],

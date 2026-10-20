@@ -1,16 +1,13 @@
 /**
     * @file dash.js, two dashes and a course that needs both.
     *
-    * Shift or X dashes, in whichever of eight directions is being held, and
-    * straight ahead when none is. While it lasts the dash controls the velocity
-    * completely, with no gravity, friction or steering. Coming out of it the
-    * character keeps its direction but not its speed, or a dash upwards would be a
-    * second jump and a dash along the ground a permanent sprint.
+    * Shift or X starts a dash in the held direction, one of eight, or in the
+    * facing direction when none is held. During the dash the velocity is fixed:
+    * gravity, friction and steering do not apply. When it ends the character
+    * keeps the direction but not the speed.
     *
-    * Two things limit it. The first is the number of dashes, which only the ground
-    * gives back. A wall does not, or a character with one dash would have as many
-    * as the level has walls. The second is a cooldown, so that two dashes in hand
-    * cannot be spent in the same instant.
+    * Dashes are limited by 'dashes', restored only on landing (walls do not
+    * restore them), and by 'dashCooldown', the minimum time between two dashes.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -39,8 +36,8 @@ const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
 
 /**
-    * What this character can do that a plain one cannot. Everything here is off
-    * by default in the engine: abilities are given, not assumed.
+    * Tuning overrides that enable this example's abilities. All abilities are
+    * disabled in the default tuning.
     *
     * @type {object}
 */
@@ -57,13 +54,12 @@ const keys = { left: 0, right: 0, up: 0, down: 0, jump: false, jumpPressed: fals
     dash: false, dashPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -141,14 +137,14 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * @type {number} dashes spent since the page loaded.
+    * @type {number} dashes used since the page loaded.
 */
 let spent = 0;
 
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -180,8 +176,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the level and the character, the character marked with what it is
-    * doing at that moment.
+    * Draws the level and the character, with a marker for its current state.
 */
 function draw() {
     const body = player.body;
@@ -212,14 +207,13 @@ function draw() {
     context.fillRect(drawX, drawY, body.width, body.height);
     context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
-    /* A notch on the side it is looking, which the engine keeps for us because a
-       dash with no direction held has to go somewhere. */
+    /* Facing notch, from 'body.facing'. */
     context.fillStyle = '#000';
     context.fillRect(drawX + (body.facing > 0 ? body.width - 4 : 0), drawY + 6, 4, 5);
 }
 
 /**
-    * Writes out what the character has left and what it is doing.
+    * Writes the remaining abilities and the current state to the readout.
 */
 function report() {
     readout.innerHTML = [

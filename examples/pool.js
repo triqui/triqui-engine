@@ -1,24 +1,20 @@
 /**
-    * @file pool.js, the same six characters, over and over.
+    * @file pool.js, reusing characters with 'remove' and 'add'.
     *
-    * They drop in from the top one at a time. Shoot one, or let it fall through
-    * the gap in the floor, and it is not destroyed: it is taken out of the engine
-    * with 'remove' and put on a shelf. The next time one is needed, the shelf is
-    * tried first, and 'add' puts it back. Six are built when the page loads and
-    * the panel will say six for as long as you leave it open.
+    * Enemies drop in from the top one at a time. An enemy that is shot or falls
+    * through the gap is removed from the engine with 'remove' and stored in a
+    * pool. New enemies are taken from the pool and re-added with 'add'. Six
+    * enemies are created at load time and no more are ever created.
     *
-    * 'add' is what makes that work. It keeps everything that belongs to the
-    * character, such as its size, tuning, data and the mind in 'think', and clears
-    * everything that was the engine's record of its last life: contacts, events,
-    * what it was touching or standing in, how many jumps it had left. And it hands
-    * out a new number each time, so anything still holding the old one finds
-    * nothing rather than a different character wearing the same name.
+    * 'add' keeps the character configuration (size, tuning, data, 'think') and
+    * clears the engine state (contacts, events, touched faces, sensors, spent
+    * jumps). It assigns a new identifier, so references to the old one resolve
+    * to nothing.
     *
-    * There are two habits worth copying. Characters go back on the shelf after
-    * 'advance' returns, never from inside a callback while the engine is in the
-    * middle of a step. And they come off it with 'place', which moves the position
-    * they are drawn from as well, so they do not slide in from wherever they were
-    * last.
+    * Two rules apply. Characters are removed after 'advance' returns, never
+    * inside a callback during a step. Characters are positioned with 'place',
+    * which also resets the previous position, so they are not interpolated from
+    * their old location.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -43,18 +39,17 @@ const LEGEND = [
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * @type {number} how many are ever built.
+    * @type {number} number of enemies created.
 */
 const POOL_SIZE = 6;
 
 /**
-    * @type {number} seconds between arrivals, when there is one to send.
+    * @type {number} seconds between spawns, when the pool is not empty.
 */
 const EVERY = 0.9;
 
 /**
-    * @type {string[]} one colour each, so a character can be recognised coming
-    *                   back for another life.
+    * @type {string[]} one colour per enemy, so reused enemies can be recognised.
 */
 const INKS = ['#e0503f', '#e6962a', '#d6c21f', '#3fbf8a', '#3fa8e0', '#9a5ce0'];
 
@@ -68,24 +63,24 @@ const viewHeight = world.rows * TILE_SIZE;
 /* ── the pool ───────────────────────────────────────────────────────────── */
 
 /**
-    * @type {object[]} characters waiting on the shelf.
+    * @type {object[]} enemies in the pool.
 */
 const shelf = [];
 
 /**
-    * @type {object[]} characters in the room.
+    * @type {object[]} enemies in the engine.
 */
 const inPlay = [];
 
 /**
-    * @type {Set<object>} characters to go back on the shelf once the step is over.
+    * @type {Set<object>} enemies to return to the pool after 'advance'.
 */
 const leaving = new Set();
 
 const count = { built: 0, arrivals: 0, lastId: 0 };
 
 /**
-    * The mind every one of them shares: walk, and turn at a wall.
+    * Enemy behaviour: walk and turn at walls.
     *
     * @param {object} self the character.
 */
@@ -96,7 +91,7 @@ function wander(self) {
     self.input.left = facing < 0 ? 1 : 0;
 }
 
-/* All of them are built once and put straight back on the shelf. */
+/* Create every enemy once and move it straight to the pool. */
 for (let index = 0; index < POOL_SIZE; index++) {
     const character = engine.spawn(0, 0, 20, 28, { runSpeed: 80 });
     character.body.data = { ink: INKS[index], lives: 0 };
@@ -107,7 +102,7 @@ for (let index = 0; index < POOL_SIZE; index++) {
 }
 
 /**
-    * Takes one off the shelf and drops it in from the top, at a random column.
+    * Takes an enemy from the pool and adds it at the top, in a random column.
 */
 function sendOne() {
     const character = shelf.pop();
@@ -128,9 +123,9 @@ function sendOne() {
 }
 
 /**
-    * Puts one back on the shelf.
+    * Removes an enemy from the engine and returns it to the pool.
     *
-    * @param {object} character the one leaving.
+    * @param {object} character the enemy.
 */
 function retire(character) {
     engine.remove(character);
@@ -141,9 +136,8 @@ function retire(character) {
 /* ── shooting ───────────────────────────────────────────────────────────── */
 
 /**
-    * Fires the way the player is facing. A character hit is only marked here;
-    * the engine is in the middle of a step, and it goes back on the shelf once
-    * that step is over.
+    * Fires in the player's facing direction. A hit enemy is only marked here,
+    * because the callback runs during a step; it is removed after 'advance'.
 */
 function fire() {
     const body = player.body;
@@ -163,8 +157,8 @@ function fire() {
 /* ── input ──────────────────────────────────────────────────────────────── */
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
     * @param {object} event the key event.
 */
@@ -228,7 +222,7 @@ let previous = performance.now();
 let untilNext = 0;
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const elapsed = Math.min((now - previous) / 1000, 0.25);
@@ -251,7 +245,7 @@ function frame(now) {
 
     engine.advance(elapsed);
 
-    /* The step is over: now the world can be rearranged. */
+    /* 'advance' has returned, so characters can be removed. */
     for (const character of inPlay) {
         if (character.body.y > viewHeight) {
             leaving.add(character);
@@ -262,7 +256,7 @@ function frame(now) {
     }
     leaving.clear();
 
-    /* The player can fall through the gap too; bring them back to the start. */
+    /* The player can also fall through the gap; respawn at the start. */
     if (player.body.y > viewHeight) {
         player.body.place(3 * TILE_SIZE, 13 * TILE_SIZE - 28);
         player.body.velocityX = 0;
@@ -275,8 +269,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the characters in play, the shots, the player, and the shelf
-    * along the top, where the waiting characters are shown in their own colours.
+    * Draws the room, the active enemies, the shots, the player, and the pool
+    * contents along the top.
 */
 function draw() {
     const alpha = engine.alpha;
@@ -333,7 +327,8 @@ function draw() {
 }
 
 /**
-    * The count that matters is the first one, and it does not move.
+    * Writes the number of created enemies, which stays constant, and the pool
+    * counts.
 */
 function report() {
     readout.innerHTML = [

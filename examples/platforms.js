@@ -1,14 +1,13 @@
 /**
-    * @file platforms.js, floors that go somewhere.
+    * @file platforms.js, moving platforms.
     *
-    * Three of them: a tram across the bottom, a lift up the right hand side, and
-    * a short shuttle in the middle that the lift delivers you to. Stand on one
-    * and it takes you with it.
+    * The level has three platforms: a tram along the bottom, a lift on the
+    * right, and a shuttle in the middle reached from the lift. A character
+    * standing on a platform is carried with it.
     *
-    * The carrying is not the platform's doing. The engine moves each platform, then
-    * moves whoever was standing on it by the same amount, through the collider,
-    * which is why being carried into a wall stops you at the wall rather than
-    * posting you into it.
+    * Each step the engine moves the platforms, then moves their riders by the
+    * same displacement through the collider. A rider carried into a wall stops
+    * at the wall.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -37,21 +36,20 @@ const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
 const player = engine.spawn(3 * TILE_SIZE, 12 * TILE_SIZE - 28, 20, 28);
 
-/* The tram runs the length of the floor and back. */
+/* Tram: back and forth along the floor. */
 engine.addPlatform(6 * TILE_SIZE, 13 * TILE_SIZE, 96, 12, {
     points: [{ x: 19 * TILE_SIZE, y: 13 * TILE_SIZE }],
     speed: 70,
 });
 
-/* The lift climbs the right hand side until its deck is level with the high
-   ledge, a short hop to the left. Stopping it under the ledge instead would
-   deliver you head first into the underside of it. */
+/* Lift: rises on the right until its top is level with the high ledge. If it
+   stopped under the ledge, a rider would be carried into it. */
 engine.addPlatform(20 * TILE_SIZE, 13 * TILE_SIZE, 80, 12, {
     points: [{ x: 20 * TILE_SIZE, y: 4 * TILE_SIZE }],
     speed: 60,
 });
 
-/* The shuttle carries you back in over the gap, on a three cornered route. */
+/* Shuttle: a three point route over the gap. */
 engine.addPlatform(15 * TILE_SIZE, 6 * TILE_SIZE, 80, 12, {
     points: [
         { x: 8 * TILE_SIZE, y: 6 * TILE_SIZE },
@@ -64,13 +62,12 @@ engine.addPlatform(15 * TILE_SIZE, 6 * TILE_SIZE, 80, 12, {
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -128,7 +125,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -155,8 +152,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the level, the platforms and the character, all at the same moment
-    * between two physics steps.
+    * Draws the level, the platforms and the character, all interpolated with
+    * the same alpha.
 */
 function draw() {
     const alpha = engine.alpha;
@@ -178,7 +175,7 @@ function draw() {
         }
     }
 
-    /* Platforms interpolate exactly like bodies, with the same two positions and alpha. */
+    /* Platforms are interpolated like bodies. */
     context.fillStyle = '#777';
     for (const platform of engine.platforms) {
         context.fillRect(platform.renderX(alpha), platform.renderY(alpha),

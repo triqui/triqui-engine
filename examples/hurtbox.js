@@ -1,26 +1,21 @@
 /**
-    * @file hurtbox.js, clemency you can see.
+    * @file hurtbox.js, a hurtbox smaller than the collision box.
     *
-    * The white rectangle inside you is the part that can be hurt; the black
-    * outline around it is the part that walls and floors see. They differ by a
-    * few pixels, and those pixels are the whole difference between a shot that
-    * grazes your hair and one that kills you.
+    * The white rectangle is the hurtbox; the black outline is the body used for
+    * walls and floors. The hurtbox is inset by a few pixels ('body.hurtbox'), so
+    * projectiles that only touch the outline miss.
     *
-    * H switches it off, so the two can be felt side by side. Two turrets fire at
-    * head height, where the forgiving margin decides everything, and one at chest
-    * height, which has to be jumped whatever the margin. The panel counts grazes,
-    * meaning shots that crossed your outline but missed your hurtbox, so the
-    * forgiveness can be measured.
+    * H toggles the inset. Two turrets fire at head height, where the inset
+    * matters, and one at chest height, which must be jumped in any case. The
+    * readout counts grazes: shots that crossed the outline but missed the
+    * hurtbox.
     *
-    * It runs both ways. The spikes along the floor are harmful sensors, so they
-    * are tested against the hurtbox and forgive a brush. The coins are ordinary
-    * sensors, tested against the whole outline, so one taken by a pixel is taken.
-    * Hazards narrower than they look, rewards wider: the same idea, pointed in two
-    * directions.
+    * Spikes on the floor are harmful sensors, tested against the hurtbox. Coins
+    * are ordinary sensors, tested against the full body. Hazards are therefore
+    * smaller than they look and pickups larger.
     *
-    * After a hit there is a moment when nothing can hurt you. That is clemency in
-    * time rather than space, and it is a timer and an 'if' in this file. The engine
-    * has no opinion about it.
+    * After a hit the player is invulnerable for a short time. That is game code
+    * in this file, a timer and a condition, not an engine feature.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -49,21 +44,21 @@ const SPAWN_X = 3 * TILE_SIZE;
 const SPAWN_Y = FLOOR - 28;
 
 /**
-    * The forgiving margins, in pixels in from each edge. More off the top than
-    * the bottom: the head is where near misses happen, and a player never feels
-    * that a shot at their feet should have missed.
+    * Hurtbox inset from each edge, in pixels. The top inset is the largest,
+    * because near misses happen mostly at head height.
     *
     * @type {{left: number, right: number, top: number, bottom: number}}
 */
 const CLEMENCY = { left: 4, right: 4, top: 9, bottom: 2 };
 
 /**
-    * @type {{left: number, right: number, top: number, bottom: number}} none.
+    * @type {{left: number, right: number, top: number, bottom: number}} zero
+    *       inset.
 */
 const NONE = { left: 0, right: 0, top: 0, bottom: 0 };
 
 /**
-    * @type {number} seconds nothing can hurt you after something has.
+    * @type {number} invulnerability time after a hit, in seconds.
 */
 const RECOVERY = 0.8;
 
@@ -85,7 +80,7 @@ const coins = [
     [7, 4], [17, 4], [13, 7], [5, 11], [20, 11],
 ].map(([col, row]) => engine.addSensor(col * TILE_SIZE + 8, row * TILE_SIZE + 8, 16, 16, 'coin'));
 
-/* A walker on the left, that reaches you through both hurtboxes at once. */
+/* A walking enemy, checked with 'hurtOverlaps', so both insets apply. */
 const walker = engine.spawn(6 * TILE_SIZE, SPAWN_Y, 20, 28, { runSpeed: 60 });
 walker.body.hurtbox = { left: 3, right: 3, top: 4, bottom: 0 };
 walker.think = self => {
@@ -97,8 +92,8 @@ walker.think = self => {
 };
 
 /**
-    * The turrets: where they fire from, which way, how often, and when first.
-    * The two at head height are the ones clemency is for.
+    * Turrets: position, direction, interval and time of the first shot. The two
+    * at head height test the inset.
     *
     * @type {Array<{x: number, y: number, dir: number, every: number, next: number,
     *               label: string}>}
@@ -114,19 +109,19 @@ const TURRETS = [
 const score = { hits: 0, grazes: 0, coins: 0 };
 
 /**
-    * @type {number} seconds of recovery left after a hit.
+    * @type {number} remaining invulnerability time, in seconds.
 */
 let recovering = 0;
 
 /**
-    * @type {string} what hit you last.
+    * @type {string} source of the last hit.
 */
 let lastHit = 'nothing yet';
 
 /**
-    * Something has reached the part of you that can be hurt.
+    * Handles a hit on the player's hurtbox.
     *
-    * @param {string} what what it was.
+    * @param {string} what source of the hit.
 */
 function hurt(what) {
     if (recovering > 0) {
@@ -151,15 +146,15 @@ player.body.onSensor = (sensor, entering) => {
 };
 
 /**
-    * Whether a segment passes through a rectangle. It is used only to notice a shot
-    * that crossed your outline and still missed, which is what a graze is.
+    * Whether a segment intersects a rectangle. Used to detect grazes: shots that
+    * crossed the body outline without hitting the hurtbox.
     *
     * @param {number} x0 start of the segment.
     * @param {number} y0 start of the segment.
     * @param {number} x1 end of the segment.
     * @param {number} y1 end of the segment.
     * @param {object} box the rectangle, as x, y, width, height.
-    * @returns {boolean} true when they meet.
+    * @returns {boolean} true when they intersect.
 */
 function crosses(x0, y0, x1, y1, box) {
     let near = 0;
@@ -193,7 +188,7 @@ function crosses(x0, y0, x1, y1, box) {
 /**
     * Fires one turret's shot.
     *
-    * @param {object} turret where from, and which way.
+    * @param {object} turret the turret that fires.
 */
 function fireTurret(turret) {
     const shot = engine.fire(turret.x + (turret.dir > 0 ? 1 : -1), turret.y,
@@ -204,7 +199,7 @@ function fireTurret(turret) {
                     shot.hitYou = true;
                     hurt('a shot at ' + turret.label + ' height');
                 }
-                /* Straight through the walker: this room is about you. */
+                /* Shots pass through the walking enemy. */
                 return contact.other === walker.body ? 'pass' : 'stop';
             },
         });
@@ -215,8 +210,8 @@ function fireTurret(turret) {
 /* ── input ──────────────────────────────────────────────────────────────── */
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
     * @param {object} event the key event.
 */
@@ -289,7 +284,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const elapsed = Math.min((now - previous) / 1000, 0.25);
@@ -315,8 +310,8 @@ function frame(now) {
     engine.advance(elapsed);
     recovering = Math.max(0, recovering - elapsed);
 
-    /* A graze: the shot crossed your outline this frame and never met the part of
-       you that counts. Each shot is counted at most once. */
+    /* Graze: the shot crossed the outline this frame without hitting the hurtbox.
+       Each shot is counted once. */
     const body = player.body;
     const outline = { x: body.x, y: body.y, width: body.width, height: body.height };
     for (const shot of engine.projectiles) {
@@ -337,8 +332,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the spikes, the coins, the turrets and the shots, and the
-    * two rectangles that are you.
+    * Draws the room, spikes, coins, turrets, shots, and the player's body and
+    * hurtbox.
 */
 function draw() {
     const alpha = engine.alpha;
@@ -396,18 +391,18 @@ function draw() {
 
     person(walker.body, alpha, '#888');
 
-    /* Blinking while nothing can hurt you, as every game since 1985 has done. */
+    /* Blink while invulnerable. */
     if (recovering === 0 || Math.floor(recovering * 12) % 2 === 0) {
         person(player.body, alpha, '#000');
     }
 }
 
 /**
-    * Draws a body as its outline, with its hurtbox filled in white inside it.
+    * Draws a body as an outline, with its hurtbox filled in white.
     *
     * @param {object} body  the body.
     * @param {number} alpha how far the frame is between the last two steps.
-    * @param {string} ink   the outline's colour.
+    * @param {string} ink   outline colour.
 */
 function person(body, alpha, ink) {
     const x = body.renderX(alpha);
@@ -424,7 +419,7 @@ function person(body, alpha, ink) {
 }
 
 /**
-    * Says whether clemency is on, and counts what it did.
+    * Writes the inset state and the hit, graze and pickup counts.
 */
 function report() {
     const body = player.body;

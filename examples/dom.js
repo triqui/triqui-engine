@@ -1,15 +1,12 @@
 /**
-    * @file dom.js, the same engine with no canvas anywhere.
+    * @file dom.js, rendering with DOM elements instead of a canvas.
     *
-    * Every tile and every character is a div, moved with a transform. Nothing in
-    * Triqui changes to allow it, because nothing in Triqui ever knew about a
-    * canvas: the engine moves rectangles and says where they are, and reading
-    * that is all a renderer ever does.
+    * Every tile and character is a div positioned with a CSS transform. The
+    * engine needs no changes, because it only computes positions.
     *
-    * The same four lines work for a Pixi sprite or a Phaser image. The one that
-    * matters is the interpolation. The position has to be read at 'engine.alpha'
-    * rather than raw, or the movement stutters against the refresh rate whatever is
-    * drawing it.
+    * The same render loop works with Pixi or Phaser sprites. Positions must be
+    * read with 'renderX'/'renderY' at 'engine.alpha', otherwise the movement
+    * stutters at the physics step rate.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -41,13 +38,12 @@ const players = [
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -97,11 +93,11 @@ stage.style.width = world.columns * TILE_SIZE + 'px';
 stage.style.height = world.rows * TILE_SIZE + 'px';
 
 /**
-    * Makes a div of a given size, parked on the stage.
+    * Creates a div of the given size and appends it to the stage.
     *
     * @param {string} kind   the class to give it.
-    * @param {number} width  how wide.
-    * @param {number} height how tall.
+    * @param {number} width  width, in pixels.
+    * @param {number} height height, in pixels.
     * @returns {object} the element.
 */
 function block(kind, width, height) {
@@ -132,7 +128,7 @@ const sprites = engine.bodies.map(body => block('body', body.width, body.height)
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     for (const player of players) {
@@ -149,7 +145,7 @@ function frame(now) {
     engine.advance((now - previous) / 1000);
     previous = now;
 
-    /* This is all of the rendering. */
+    /* Rendering. */
     const alpha = engine.alpha;
     engine.bodies.forEach((body, index) => {
         const sprite = sprites[index];

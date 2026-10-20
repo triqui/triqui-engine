@@ -1,16 +1,13 @@
 /**
-    * @file pickups.js, the question a ray cannot answer.
+    * @file pickups.js, coins and water implemented with sensors.
     *
-    * Coins to collect and a pool to swim in, both made of sensors: rectangles that
-    * notice and do not resist. A cast asks what is in front of something, which is
-    * the right question for a wall and the wrong one for a coin, because being
-    * inside a coin has no direction and no distance.
+    * Sensors detect overlaps without blocking movement. Ray casts report what is
+    * ahead of a point, which does not apply to pickups, so sensors use box
+    * overlap tests.
     *
-    * What a sensor reports is not that you are inside it, which is true for as
-    * long as it takes to walk across one, but the two moments that matter. The
-    * pool is the argument for both: the way in is where the water takes hold, and
-    * the way out is where it lets go. Without the second the character swims for
-    * the rest of the game.
+    * Sensors report transitions, entering and leaving, through 'onSensor'. The
+    * water uses both: entering applies the swimming tuning and leaving restores
+    * the default tuning.
 */
 
 import { TriquiWorld, TriquiEngine, DEFAULT_TUNING } from '../src/triqui.js';
@@ -40,7 +37,7 @@ const engine = new TriquiEngine(world);
 const player = engine.spawn(40, 420, 20, 28);
 
 /**
-    * Where the coins sit: a column and the row of the ledge they rest on.
+    * Coin positions: column, and row of the ledge below the coin.
     *
     * @type {Array<{col: number, row: number}>}
 */
@@ -54,7 +51,7 @@ const coins = PLACES.map(place => engine.addSensor(
     place.col * TILE_SIZE + 8, place.row * TILE_SIZE - 24, 16, 16, 'coin',
 ));
 
-/* The pool fills the bottom left of the room. */
+/* Water area, bottom left of the room. */
 const pool = engine.addSensor(TILE_SIZE, 13 * TILE_SIZE, 6 * TILE_SIZE, TILE_SIZE, 'water');
 
 /**
@@ -63,14 +60,13 @@ const pool = engine.addSensor(TILE_SIZE, 13 * TILE_SIZE, 6 * TILE_SIZE, TILE_SIZ
 let taken = 0;
 
 /**
-    * @type {string} what just happened, for the panel.
+    * @type {string} last sensor event, for the readout.
 */
 let note = 'nothing yet';
 
 player.body.onSensor = (sensor, entering) => {
     if (sensor.data === 'coin' && entering) {
-        /* Switching it off is cheaper than removing it, and puts it back in one
-           assignment when the game wants to. */
+        /* Disable instead of removing, so R can re-enable it. */
         sensor.enabled = false;
         taken++;
         note = 'took a coin';
@@ -78,8 +74,7 @@ player.body.onSensor = (sensor, entering) => {
     }
 
     if (sensor.data === 'water') {
-        /* Tuning belongs to the character, not the world, so the water changes
-           this one and nobody else. */
+        /* Tuning is per character, so only this character is affected. */
         player.tuning.gravityY = entering ? 700 : DEFAULT_TUNING.gravityY;
         player.tuning.maxFallSpeed = entering ? 180 : DEFAULT_TUNING.maxFallSpeed;
         player.tuning.jumpSpeed = entering ? 320 : DEFAULT_TUNING.jumpSpeed;
@@ -91,13 +86,12 @@ player.body.onSensor = (sensor, entering) => {
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -162,7 +156,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -186,7 +180,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the water, the coins still out and the character.
+    * Draws the room, the water, the remaining coins and the character.
 */
 function draw() {
     const body = player.body;

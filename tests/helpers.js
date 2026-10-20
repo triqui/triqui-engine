@@ -1,5 +1,5 @@
 /**
-    * @file helpers.js, what every test file builds its rooms with.
+    * @file helpers.js, shared builders for the test suites.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -11,7 +11,7 @@ export const TILE = 32;
     * solid. One way decks come with their definition.
     *
     * @param {string[]} legend the rows.
-    * @param {object}   [world] further options for the world.
+    * @param {object}   [world] additional world options.
     * @returns {TriquiWorld} the world.
 */
 export function worldOf(legend, world = {}) {
@@ -23,7 +23,7 @@ export function worldOf(legend, world = {}) {
 
 /**
     * @param {string[]} legend the rows.
-    * @param {object}   [world] further options for the world.
+    * @param {object}   [world] additional world options.
     * @returns {TriquiEngine} an engine over it.
 */
 export const engineOf = (legend, world) => new TriquiEngine(worldOf(legend, world));
@@ -32,7 +32,7 @@ export const engineOf = (legend, world) => new TriquiEngine(worldOf(legend, worl
     * Runs whole physics steps, calling back after each.
     *
     * @param {TriquiEngine} engine the engine.
-    * @param {number}       steps  how many.
+    * @param {number}       steps  number of steps.
     * @param {Function}     [each] called with the index after every step.
 */
 export function run(engine, steps, each) {
@@ -45,7 +45,7 @@ export function run(engine, steps, each) {
 }
 
 /**
-    * Presses jump for one step and keeps it held.
+    * Presses jump for one step and keeps the button held.
     *
     * @param {object} controller the character.
 */

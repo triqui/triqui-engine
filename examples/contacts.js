@@ -1,14 +1,13 @@
 /**
-    * @file contacts.js, what the collider knows and used to throw away.
+    * @file contacts.js, reading tile, cell and impact speed from a contact.
     *
-    * The floors on the bottom row are glass. Land on one gently and nothing
-    * happens; fall onto it from a couple of ledges up and it goes, because the
-    * contact that stopped the fall carries the tile's identifier, the cell it
-    * lives in, its definition and the speed of the impact. None of that survives
-    * 'touching.bottom'.
+    * The bottom row floors are glass. A soft landing leaves them intact; a fall
+    * from a higher ledge breaks the tile. 'onCollision' receives a contact with
+    * the tile identifier, the cell, the tile definition and the impact speed,
+    * none of which is available from 'touching.bottom'.
     *
-    * The map is an ordinary array and the grid reads it every cast, so breaking a
-    * tile is one assignment. R puts them all back.
+    * The grid reads the map array on every cast, so breaking a tile is a single
+    * assignment to the array. R restores all tiles.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -33,25 +32,25 @@ const LEGEND = [
 ];
 
 /**
-    * @type {object} what each character in the map means.
+    * @type {object} tile identifier for each legend character.
 */
 const IDS = { '.': 0, '#': 1, o: 3 };
 
 /**
-    * Tile definitions. Anything here is handed back on the contact, so a tile can
-    * carry whatever the game needs to know about it.
+    * Tile definitions. Every field is passed back in the contact's 'tile', so a
+    * definition can carry any game data.
     *
     * @type {object}
 */
 const DEFINITIONS = { 3: { glass: true } };
 
 /**
-    * @type {number} how fast a landing has to be to break glass.
+    * @type {number} minimum impact speed that breaks glass.
 */
 const BREAKING_SPEED = 650;
 
 /**
-    * Builds a fresh map from the legend.
+    * Builds a new map from the legend.
     *
     * @returns {number[][]} tile identifiers.
 */
@@ -63,12 +62,12 @@ const engine = new TriquiEngine(world);
 const player = engine.spawn(64, 420, 20, 28);
 
 /**
-    * @type {object[]} the last few contacts, newest first, for the panel.
+    * @type {object[]} recent contacts, newest first, for the readout.
 */
 const log = [];
 
 /**
-    * @type {number} how many panes have gone.
+    * @type {number} number of broken glass tiles.
 */
 let broken = 0;
 
@@ -86,13 +85,12 @@ player.body.onCollision = contact => {
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -157,7 +155,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -178,7 +176,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the level, the glass in outline, and the character.
+    * Draws the level, the glass tiles as outlines, and the character.
 */
 function draw() {
     const body = player.body;
@@ -212,7 +210,7 @@ function draw() {
 }
 
 /**
-    * Writes out the last few contacts, exactly as the collider handed them over.
+    * Writes the recent contacts to the readout, as received from the collider.
 */
 function report() {
     const lines = [['broken', broken + ' of 10 panes   (R puts them back)']];

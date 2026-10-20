@@ -1,20 +1,18 @@
 /**
-    * @file shoot.js, four kinds of shot that are the same shot.
+    * @file shoot.js, four projectile types built on one class.
     *
-    * A projectile is not a body. It is a point, and once a step it asks raycast2d
-    * one question: what lies between where I am and where I am about to be? The
-    * answer comes back complete and sorted, with every wall, platform and character
-    * on the segment listed nearest first, so nothing can be skipped at any speed,
-    * and a shot sees everything in its path and not only the first of it.
+    * A projectile is a point, not a body. Each step it casts the segment from
+    * its current position to its next one, and raycast2d returns every wall,
+    * platform and character on the segment, sorted by distance. Projectiles
+    * cannot tunnel at any speed and see every hit on the segment.
     *
-    * What happens at each of those is the game's to say. Every contact is
-    * recorded, and 'onContact' is asked about each in turn; answer 'pass' and the
-    * shot goes on, answer anything else and it stops there. The four modes below
-    * differ in nothing but that answer, and in whether gravity pulls on them.
+    * The game decides what happens at each hit. Every contact is recorded and
+    * passed to 'onContact' in order; returning 'pass' continues, any other value
+    * stops the projectile. The four modes differ only in 'onContact' and in
+    * gravity.
     *
-    * Shots also shove what they reach, with the same 'impulse' a spring uses, and
-    * the characters take that and carry on walking. The two systems know nothing
-    * about each other and only meet in a callback.
+    * Hit characters receive an 'impulse' along the shot direction, and their
+    * 'think' keeps them walking.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -41,8 +39,8 @@ const IDS = { '.': 0, '#': 1, '=': 2 };
 const MAP = LEGEND.map(row => [...row].map(char => IDS[char]));
 
 /**
-    * The four answers. Each is only what to do on reaching something, and how
-    * long to fly, and whether to fall.
+    * The four projectile modes: speed, lifetime, gravity, and the 'onContact'
+    * decision.
     *
     * @type {Array<{name: string, key: string, speed: number, life: number,
     *               gravity: number, decide: Function, about: string}>}
@@ -80,16 +78,16 @@ player.body.data = { name: 'you' };
 /* ── the targets: walkers that turn at walls and at the ends of ledges ───── */
 
 /**
-    * @type {string[]} one colour each.
+    * @type {string[]} one colour per mode.
 */
 const WALKER_INKS = ['#e0503f', '#e6962a', '#3fa8e0', '#9a5ce0', '#3fbf8a'];
 
 /**
-    * Asks whether there is still ground just beyond a character's toes.
+    * Whether there is ground just past a character's leading edge.
     *
     * @param {object} body   the character.
-    * @param {number} facing which way it is going.
-    * @returns {boolean} true when it can keep walking.
+    * @param {number} facing direction of travel.
+    * @returns {boolean} true when there is ground ahead.
 */
 function groundAhead(body, facing) {
     const x = facing > 0 ? body.x + body.width + 2 : body.x - 2;
@@ -119,28 +117,28 @@ const walkers = [
 /* ── firing ─────────────────────────────────────────────────────────────── */
 
 /**
-    * @type {number} which of the four is loaded.
+    * @type {number} index of the selected mode.
 */
 let mode = 0;
 
 /**
-    * @type {object[]} what the last shot reached, for the panel.
+    * @type {object[]} contacts of the last projectile, for the readout.
 */
 let lastContacts = [];
 
 /**
-    * @type {string} how the last shot ended.
+    * @type {string} end reason of the last projectile.
 */
 let lastEnd = 'nothing fired yet';
 
 /**
-    * @type {Array<{x: number, y: number, age: number}>} where shots stopped, kept
-    *                                                    for a moment to be seen.
+    * @type {Array<{x: number, y: number, age: number}>} recent stop positions,
+    *                                                    drawn for a short time.
 */
 const marks = [];
 
 /**
-    * Fires the loaded kind of shot the way the character is facing.
+    * Fires a projectile of the selected mode in the facing direction.
 */
 function fire() {
     const body = player.body;
@@ -157,8 +155,8 @@ function fire() {
             life: kind.life,
             gravityY: kind.gravity,
             onContact: contact => {
-                /* Whatever was reached gets a shove along the shot, whether the
-                   shot stops there or not. */
+                /* Push every hit object along the shot, whether or not the
+                   projectile stops. */
                 if (contact.kind === 'body') {
                     const shot = contact.projectile;
                     const pushX = Math.sign(shot.velocityX) || 1;
@@ -180,8 +178,8 @@ function fire() {
 }
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
     * @param {object} event the key event.
 */
@@ -250,7 +248,7 @@ context.scale(ratio, ratio);
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const elapsed = (now - previous) / 1000;
@@ -283,8 +281,8 @@ function frame(now) {
 }
 
 /**
-    * Draws the room, the walkers, the shots in flight with a short tail, and the
-    * places shots have recently stopped.
+    * Draws the room, the walkers, the active projectiles with a tail, and recent
+    * stop positions.
 */
 function draw() {
     const alpha = engine.alpha;
@@ -332,8 +330,7 @@ function draw() {
     context.fillStyle = you.grounded ? '#fff' : '#000';
     context.fillRect(youX + (you.facing > 0 ? you.width - 5 : 0), youY + 7, 5, 6);
 
-    /* A projectile is a point; the tail is where it was a step ago, which is
-       also exactly the segment it just swept. */
+    /* The tail is the segment cast in the last step. */
     context.strokeStyle = '#000';
     context.lineWidth = 2;
     for (const shot of engine.projectiles) {
@@ -358,8 +355,8 @@ function draw() {
 }
 
 /**
-    * Says what is loaded, and what the last shot reached, in the order it
-    * reached them.
+    * Writes the selected mode and the contacts of the last projectile, in
+    * order.
 */
 function report() {
     const kind = MODES[mode];

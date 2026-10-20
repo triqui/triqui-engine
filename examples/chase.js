@@ -1,14 +1,12 @@
 /**
     * @file chase.js, characters that are not driven by a keyboard.
     *
-    * A controller reads an input object and does not care who filled it in. Here
-    * three of them are filled in by a few lines of arithmetic instead: look for
-    * the player, and if the level is not in the way, lean that way and jump when
-    * something stops you.
+    * A controller reads its input object regardless of what writes into it. Here
+    * three controllers are driven by code: each hunter checks line of sight to
+    * the player, moves towards the player when visible, and jumps when blocked.
     *
-    * Looking is a question about geometry, so it goes straight to raycast2d
-    * through the world's own caster. The engine never had to grow a vision
-    * system: it was already there, underneath.
+    * Line of sight uses 'world.raycaster.lineOfSight' from raycast2d. The engine
+    * needs no vision system of its own.
 */
 
 import { TriquiWorld, TriquiEngine } from '../src/triqui.js';
@@ -43,8 +41,7 @@ const engine = new TriquiEngine(world);
 const player = engine.spawn(40, 420, 20, 28);
 
 /**
-    * The hunters. Slower than the player and a little floatier, so being chased
-    * is a nuisance rather than a death sentence.
+    * The hunters. They are slower than the player and have lower gravity.
     *
     * @type {object[]}
 */
@@ -57,13 +54,12 @@ const hunters = [
 const keys = { left: 0, right: 0, jump: false, jumpPressed: false };
 
 /**
-    * Swallows a key press, but only when it is one of ours and nothing is being
-    * held with it.
+    * Prevents the default action of a key handled by this page, unless a modifier
+    * is held.
     *
-    * Arrows and the space bar scroll the page, so those are worth taking. Nothing
-    * else is: calling preventDefault on every key takes F12, Ctrl+Shift+I and
-    * every other browser shortcut with it, which is a miserable thing to do to
-    * somebody trying to look at the console.
+    * Only arrows and the space bar are blocked, because they scroll the page.
+    * Blocking every key would also disable browser shortcuts such as F12 and
+    * Ctrl+Shift+I.
     *
     * @param {object} event the key event.
 */
@@ -108,25 +104,25 @@ addEventListener('blur', () => {
 
 /**
     * @param {object} body the body to measure.
-    * @returns {number} the middle of it.
+    * @returns {number} its centre.
 */
 const centerX = body => body.x + body.width / 2;
 
 /**
     * @param {object} body the body to measure.
-    * @returns {number} the middle of it.
+    * @returns {number} its centre.
 */
 const centerY = body => body.y + body.height / 2;
 
 /**
     * Writes one hunter's input for this frame.
     *
-    * Seeing is a clear line to the player and nothing more. Wanting to move is
-    * the sign of the distance. Jumping is what you do when the ground stops
-    * being an answer: a wall in front, or nothing under you and the player above.
+    * The hunter sees the player when the line between them is clear, moves in
+    * the direction of the player, and jumps when a wall is in front or when it
+    * is airborne below the player.
     *
-    * @param {object} hunter  the controller to fill in.
-    * @returns {boolean} whether it could see the player at all.
+    * @param {object} hunter  the controller to write.
+    * @returns {boolean} whether it can see the player.
 */
 function think(hunter) {
     const body = hunter.body;
@@ -162,7 +158,7 @@ function think(hunter) {
         input.jump = true;
     }
     if (body.velocityY > 0) {
-        input.jump = false;                 // let go on the way down, for a short hop
+        input.jump = false;                 // release on the way down, for a short hop
     }
     return true;
 }
@@ -180,15 +176,15 @@ canvas.style.aspectRatio = viewWidth + ' / ' + viewHeight;
 context.scale(ratio, ratio);
 
 /**
-    * @type {boolean[]} whether each hunter could see the player this frame, kept
-    *                   for the drawing.
+    * @type {boolean[]} whether each hunter could see the player this frame, for
+    *                   drawing.
 */
 const seeing = hunters.map(() => false);
 
 let previous = performance.now();
 
 /**
-    * @param {number} now when this frame began.
+    * @param {number} now frame timestamp.
 */
 function frame(now) {
     const input = player.input;
@@ -212,7 +208,7 @@ function frame(now) {
 }
 
 /**
-    * Draws the level, the lines of sight that found something, and everybody.
+    * Draws the level, the successful lines of sight and the characters.
 */
 function draw() {
     const alpha = engine.alpha;

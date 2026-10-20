@@ -1,11 +1,11 @@
 /**
-    * @file smoke.mjs, runs every example in Node, with no browser.
+    * @file smoke.mjs, runs every example headless in Node.
     *
-    * Each one gets a stand-in DOM, made of elements that accept anything, a 2D
-    * context that swallows every call and a requestAnimationFrame that queues, and
-    * is driven for a few hundred frames. It catches what a syntax check cannot: a
-    * missing element, a misspelled engine call, anything that throws inside the
-    * loop. It cannot tell whether an example looks right; that needs a browser.
+    * Each example runs with a stub DOM (elements that accept any property, a 2D
+    * context that ignores every call, a queued requestAnimationFrame) for a few
+    * hundred frames. It detects missing elements, misspelled engine calls and
+    * runtime exceptions in the loop. It does not check rendering; use a browser
+    * for that.
     *
     * Usage:
     *     node tools/smoke.mjs                   every example and the demo
@@ -30,7 +30,7 @@ if (!target) {
 
     let failed = 0;
     for (const file of files) {
-        /* One process each: every example sets up its own globals. */
+        /* One process per example, because each example sets its own globals. */
         const run = spawnSync(process.execPath, [fileURLToPath(import.meta.url), file],
             { encoding: 'utf8' });
         const name = relative(root, file);
@@ -77,7 +77,7 @@ globalThis.devicePixelRatio = 1;
 globalThis.addEventListener = () => {};
 globalThis.requestAnimationFrame = callback => queue.push(callback);
 
-/* Examples log on purpose; that is not what is being tested here. */
+/* Console output from examples is expected and ignored. */
 console.log = () => {};
 
 await import(pathToFileURL(resolve(target)).href);
