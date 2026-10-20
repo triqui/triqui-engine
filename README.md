@@ -31,6 +31,12 @@ function frame(now) {
 }
 ```
 
+## Demo
+
+Live demo: https://triqui.github.io/triqui-engine/
+
+Every example can be played in the browser; the links are in the table below.
+
 ## Features
 
 ### World and physics
@@ -92,38 +98,39 @@ Then import from `triqui.js`, which loads `raycast.js` from its own folder.
 
 ## Examples
 
-ES modules do not load from `file://`, so serve the folder with any static
-server. Open `index.html` for the demo, or open one of the examples directly.
+Each example links to the playable page and to its source. To run them
+locally, serve the folder with any static server, because ES modules do not
+load from `file://`, then open `index.html` or any page in `examples/`.
 
 ```
 npx http-server .
 ```
 
-| Example | What it shows |
-|---|---|
-| [minimal](examples/minimal.html) | The smallest working setup. Press R to see the collider's rays |
-| [tuning](examples/tuning.html) | Fourteen sliders and five preset characters, in a room marked like a ruler |
-| [shoot](examples/shoot.html) | Four kinds of projectile built on the same shot |
-| [glide](examples/glide.html) | Two ways of falling slowly, and where each one lands |
-| [hurtbox](examples/hurtbox.html) | A visible hurtbox, with a count of near misses |
-| [pool](examples/pool.html) | Six characters reused over and over |
-| [feel](examples/feel.html) | The same level with and without coyote time and jump buffer |
-| [chase](examples/chase.html) | Enemies that look for you using line of sight |
-| [patrol](examples/patrol.html) | Four enemy behaviours, one of which never walks off a ledge |
-| [dom](examples/dom.html) | Rendering with `div` elements instead of a canvas |
-| [contacts](examples/contacts.html) | Glass tiles that break on a hard landing |
-| [platforms](examples/platforms.html) | A tram, a lift and a shuttle |
-| [one way](examples/oneway.html) | A tower of platforms you can only land on from above |
-| [drop through](examples/dropthrough.html) | The same tower, climbed downwards |
-| [crush](examples/crush.html) | A press and a piston that push you, and crush you only when you are cornered |
-| [pickups](examples/pickups.html) | Coins and water, both made with sensors |
-| [gravity](examples/gravity.html) | Gravity rotated by a quarter turn at a time |
-| [wall slide](examples/wallslide.html) | Sliding down a wall to slow the fall |
-| [wall jump](examples/walljump.html) | Climbing a shaft with nothing to stand on |
-| [air jumps](examples/airjump.html) | Double and triple jumps |
-| [dash](examples/dash.html) | Two kinds of dash and a course that needs both |
-| [impulse](examples/impulse.html) | Charged jumps and springs |
-| [wrap](examples/wrap.html) | A room without a floor, where falling brings you back in from the top |
+| Example | What it shows | Code |
+|---|---|---|
+| [minimal](https://triqui.github.io/triqui-engine/examples/minimal.html) | The smallest working setup. Press R to see the collider's rays | [source](examples/minimal.js) |
+| [tuning](https://triqui.github.io/triqui-engine/examples/tuning.html) | Fourteen sliders and five preset characters, in a room marked like a ruler | [source](examples/tuning.js) |
+| [shoot](https://triqui.github.io/triqui-engine/examples/shoot.html) | Four kinds of projectile built on the same shot | [source](examples/shoot.js) |
+| [glide](https://triqui.github.io/triqui-engine/examples/glide.html) | Two ways of falling slowly, and where each one lands | [source](examples/glide.js) |
+| [hurtbox](https://triqui.github.io/triqui-engine/examples/hurtbox.html) | A visible hurtbox, with a count of near misses | [source](examples/hurtbox.js) |
+| [pool](https://triqui.github.io/triqui-engine/examples/pool.html) | Six characters reused over and over | [source](examples/pool.js) |
+| [feel](https://triqui.github.io/triqui-engine/examples/feel.html) | The same level with and without coyote time and jump buffer | [source](examples/feel.js) |
+| [chase](https://triqui.github.io/triqui-engine/examples/chase.html) | Enemies that look for you using line of sight | [source](examples/chase.js) |
+| [patrol](https://triqui.github.io/triqui-engine/examples/patrol.html) | Four enemy behaviours, one of which never walks off a ledge | [source](examples/patrol.js) |
+| [dom](https://triqui.github.io/triqui-engine/examples/dom.html) | Rendering with `div` elements instead of a canvas | [source](examples/dom.js) |
+| [contacts](https://triqui.github.io/triqui-engine/examples/contacts.html) | Glass tiles that break on a hard landing | [source](examples/contacts.js) |
+| [platforms](https://triqui.github.io/triqui-engine/examples/platforms.html) | A tram, a lift and a shuttle | [source](examples/platforms.js) |
+| [one way](https://triqui.github.io/triqui-engine/examples/oneway.html) | A tower of platforms you can only land on from above | [source](examples/oneway.js) |
+| [drop through](https://triqui.github.io/triqui-engine/examples/dropthrough.html) | The same tower, climbed downwards | [source](examples/dropthrough.js) |
+| [crush](https://triqui.github.io/triqui-engine/examples/crush.html) | A press and a piston that push you, and crush you only when you are cornered | [source](examples/crush.js) |
+| [pickups](https://triqui.github.io/triqui-engine/examples/pickups.html) | Coins and water, both made with sensors | [source](examples/pickups.js) |
+| [gravity](https://triqui.github.io/triqui-engine/examples/gravity.html) | Gravity rotated by a quarter turn at a time | [source](examples/gravity.js) |
+| [wall slide](https://triqui.github.io/triqui-engine/examples/wallslide.html) | Sliding down a wall to slow the fall | [source](examples/wallslide.js) |
+| [wall jump](https://triqui.github.io/triqui-engine/examples/walljump.html) | Climbing a shaft with nothing to stand on | [source](examples/walljump.js) |
+| [air jumps](https://triqui.github.io/triqui-engine/examples/airjump.html) | Double and triple jumps | [source](examples/airjump.js) |
+| [dash](https://triqui.github.io/triqui-engine/examples/dash.html) | Two kinds of dash and a course that needs both | [source](examples/dash.js) |
+| [impulse](https://triqui.github.io/triqui-engine/examples/impulse.html) | Charged jumps and springs | [source](examples/impulse.js) |
+| [wrap](https://triqui.github.io/triqui-engine/examples/wrap.html) | A room without a floor, where falling brings you back in from the top | [source](examples/wrap.js) |
 
 ## Using it from TypeScript
 
