@@ -1,7 +1,6 @@
 /*
     * Shared styles for the demo and the examples, on top of Bootstrap 5.3.
-    * Colours come from Bootstrap variables, so pages using data-bs-theme="dark"
-    * (minimal) need no separate rules.
+    * Colours come from Bootstrap variables.
 */
 
 .page { max-width: 860px; }

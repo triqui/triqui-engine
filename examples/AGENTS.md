@@ -29,8 +29,6 @@ rule to `examples.css`.
   attributes. The script resizes the canvas to the level; the attributes only
   avoid a layout jump on load.
 - `<script type="module" src="./name.js">`, last.
-- `minimal` is the only dark page (`data-bs-theme="dark"` on `<html>`), and
-  that is intentional.
 
 **The example selector is generated.** Do not edit it by hand. Add the example
 to the list in `tools/nav.mjs`, in the order a reader should meet it, and run
@@ -125,5 +123,5 @@ npm run check
 
 and open the page in a browser if you can (`npx http-server .` or any static
 server; ES modules do not load from `file://`). The smoke run proves an
-example does not throw; only a browser shows whether it looks right and is fun
+example does not throw and that no character starts inside a solid tile; only a browser shows whether it looks right and is fun
 to play.

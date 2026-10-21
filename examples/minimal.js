@@ -29,20 +29,20 @@ const LEGEND = [
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * Colour palette, based on the Bootstrap dark theme.
+    * Colour palette, based on Bootstrap.
     *
     * @type {object}
 */
 const INK = {
-    background: '#212529',
-    grid: '#2b3035',
-    tile: '#343a40',
-    tileEdge: '#495057',
-    standing: '#75b798',
-    flying: '#ffda6a',
-    facing: '#212529',
-    clear: '#6ea8fe',
-    hit: '#ea868f',
+    background: '#fff',
+    grid: '#f1f3f5',
+    tile: '#dee2e6',
+    tileEdge: '#6c757d',
+    standing: '#0d6efd',
+    flying: '#9ec5fe',
+    facing: '#fff',
+    clear: '#adb5bd',
+    hit: '#dc3545',
 };
 
 /**
@@ -53,7 +53,8 @@ const MIN_RAY_LENGTH = 11;
 
 const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
-const player = engine.spawn(48, 292, 20, 28);
+/* On the floor, in the free cell left of the first ledge. */
+const player = engine.spawn(40, 324, 20, 28);
 
 /**
     * Prevents the default action of a key handled by this page, unless a modifier

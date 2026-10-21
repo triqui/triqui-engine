@@ -2,10 +2,11 @@
     * @file nav.mjs, generates the example selector on every page.
     *
     * Every example page, and the demo page, contains a select element listing
-    * the demo and all examples, in the order below, with the current page
-    * selected. It is written between the '<!-- examples -->' and
-    * '<!-- /examples -->' markers. To add an example, add it to the list and run
-    * this script. The selector is not edited by hand.
+    * all examples, in the order below, with the current page selected. On the
+    * demo page a placeholder option is selected instead. The selector is
+    * written between the '<!-- examples -->' and '<!-- /examples -->' markers.
+    * To add an example, add it to the list and run this script. The selector is
+    * not edited by hand.
     *
     * Usage:
     *     node tools/nav.mjs           rewrite the selector on every page
@@ -17,32 +18,34 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
-/* Reading order: basics, larger examples, then one feature per example.
+/* Order of increasing complexity: the basic setup and rendering, tuning,
+   level geometry, abilities, physics changes written as game code, sensors and
+   contacts, then non player characters, projectiles and pooling.
    [file name without extension, label] */
 export const EXAMPLES = [
     ['minimal', 'minimal'],
-    ['tuning', 'tuning'],
-    ['shoot', 'shoot'],
-    ['glide', 'glide'],
-    ['hurtbox', 'hurtbox'],
-    ['pool', 'pool'],
-    ['feel', 'feel'],
-    ['chase', 'chase'],
-    ['patrol', 'patrol'],
     ['dom', 'dom'],
-    ['contacts', 'contacts'],
-    ['platforms', 'platforms'],
+    ['tuning', 'tuning'],
+    ['feel', 'feel'],
     ['oneway', 'one way'],
     ['dropthrough', 'drop through'],
-    ['crush', 'crush'],
-    ['pickups', 'pickups'],
-    ['gravity', 'gravity'],
+    ['platforms', 'platforms'],
+    ['airjump', 'air jumps'],
     ['wallslide', 'wall slide'],
     ['walljump', 'wall jump'],
-    ['airjump', 'air jumps'],
     ['dash', 'dash'],
+    ['glide', 'glide'],
     ['impulse', 'impulse'],
+    ['gravity', 'gravity'],
     ['wrap', 'wrap'],
+    ['pickups', 'pickups'],
+    ['contacts', 'contacts'],
+    ['crush', 'crush'],
+    ['patrol', 'patrol'],
+    ['chase', 'chase'],
+    ['hurtbox', 'hurtbox'],
+    ['shoot', 'shoot'],
+    ['pool', 'pool'],
 ];
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -60,11 +63,11 @@ const checking = process.argv.includes('--check');
 */
 function selector(current, atRoot) {
     const prefix = atRoot ? './examples/' : './';
-    const demo = atRoot ? './index.html' : '../index.html';
-    const options = [[demo, 'demo', current === 'index']]
-        .concat(EXAMPLES.map(([file, label]) => [prefix + file + '.html', label, file === current]))
-        .map(([href, label, selected]) =>
-            `<option value="${href}"${selected ? ' selected' : ''}>${label}</option>`);
+    const placeholder = current === 'index'
+        ? ['<option value="" selected disabled>examples</option>'] : [];
+    const options = placeholder.concat(EXAMPLES.map(([file, label]) =>
+        `<option value="${prefix}${file}.html"${file === current ? ' selected' : ''}>`
+        + `${label}</option>`));
     return '<!-- examples --><select class="form-select form-select-sm w-auto" '
         + 'aria-label="Examples" onchange="location.href = this.value">'
         + options.join('') + '</select><!-- /examples -->';

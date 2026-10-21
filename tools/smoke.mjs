@@ -4,8 +4,8 @@
     * Each example runs with a stub DOM (elements that accept any property, a 2D
     * context that ignores every call, a queued requestAnimationFrame) for a few
     * hundred frames. It detects missing elements, misspelled engine calls and
-    * runtime exceptions in the loop. It does not check rendering; use a browser
-    * for that.
+    * runtime exceptions in the loop, and characters that start inside solid
+    * tiles. It does not check rendering; use a browser for that.
     *
     * Usage:
     *     node tools/smoke.mjs                   every example and the demo
@@ -79,6 +79,32 @@ globalThis.requestAnimationFrame = callback => queue.push(callback);
 
 /* Console output from examples is expected and ignored. */
 console.log = () => {};
+
+/*
+    * A body that starts inside solid tiles stays stuck, because the collider
+    * does not extract bodies. The first 'advance' of the example checks every
+    * body against the level before running.
+*/
+const triqui = await import(pathToFileURL(join(root, 'src', 'triqui.js')).href);
+const advance = triqui.TriquiEngine.prototype.advance;
+triqui.TriquiEngine.prototype.advance = function (seconds) {
+    triqui.TriquiEngine.prototype.advance = advance;
+    for (const body of this.bodies) {
+        const cells = [];
+        this.world.overlapping(body.x + 0.5, body.y + 0.5, body.width - 1, body.height - 1,
+            entry => {
+                const passable = entry.tile && (entry.tile.solid === false || entry.tile.oneWay);
+                if (entry.tileId && !passable) {
+                    cells.push(entry.cellX + ',' + entry.cellY);
+                }
+            });
+        if (cells.length) {
+            throw new Error(`a body starts inside solid tiles at ${body.x}, ${body.y}`
+                + ` (cells ${cells.join(' ')})`);
+        }
+    }
+    return advance.call(this, seconds);
+};
 
 await import(pathToFileURL(resolve(target)).href);
 

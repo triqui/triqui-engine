@@ -31,7 +31,7 @@ const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE, bodiesCollide: true });
 const engine = new TriquiEngine(world);
 const players = [
-    engine.spawn(48, 292, 20, 28),
+    engine.spawn(40, 324, 20, 28),
     engine.spawn(160, 292, 20, 28),
 ];
 
