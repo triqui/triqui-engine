@@ -286,8 +286,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -303,7 +303,7 @@ function draw() {
     if (seen) {
         const hunter = follower.body;
         const prey = player.body;
-        context.strokeStyle = '#999';
+        context.strokeStyle = '#adb5bd';
         context.setLineDash([3, 4]);
         context.beginPath();
         context.moveTo(hunter.renderCenterX(alpha), hunter.renderCenterY(alpha));
@@ -330,13 +330,13 @@ function paint(body, isYou) {
     const x = body.renderX(alpha);
     const y = body.renderY(alpha);
 
-    context.fillStyle = isYou ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = isYou ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(x, y, body.width, body.height);
     context.strokeRect(x + 0.75, y + 0.75, body.width - 1.5, body.height - 1.5);
 
-    context.fillStyle = isYou ? '#fff' : '#000';
+    context.fillStyle = isYou ? '#fff' : '#0d6efd';
     context.fillRect(x + (body.facing > 0 ? body.width - 4 : 0), y + 5, 4, 4);
 }
 

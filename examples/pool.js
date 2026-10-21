@@ -51,7 +51,7 @@ const EVERY = 0.9;
 /**
     * @type {string[]} one colour per enemy, so reused enemies can be recognised.
 */
-const INKS = ['#e0503f', '#e6962a', '#d6c21f', '#3fbf8a', '#3fa8e0', '#9a5ce0'];
+const INKS = ['#dc3545', '#fd7e14', '#ffc107', '#198754', '#0dcaf0', '#6f42c1'];
 
 const world = new TriquiWorld({ map: MAP, tileSize: TILE_SIZE });
 const engine = new TriquiEngine(world);
@@ -278,8 +278,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -302,7 +302,7 @@ function draw() {
         context.fillRect(x + (body.facing > 0 ? body.width - 5 : 0), y + 7, 5, 6);
     }
 
-    context.fillStyle = '#000';
+    context.fillStyle = '#0d6efd';
     for (const shot of engine.projectiles) {
         context.beginPath();
         context.arc(shot.renderX(alpha), shot.renderY(alpha), 2.5, 0, Math.PI * 2);
@@ -312,12 +312,12 @@ function draw() {
     const you = player.body;
     const youX = you.renderX(alpha);
     const youY = you.renderY(alpha);
-    context.fillStyle = you.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = you.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(youX, youY, you.width, you.height);
     context.strokeRect(youX + 0.75, youY + 0.75, you.width - 1.5, you.height - 1.5);
-    context.fillStyle = you.grounded ? '#fff' : '#000';
+    context.fillStyle = you.grounded ? '#fff' : '#0d6efd';
     context.fillRect(youX + (you.facing > 0 ? you.width - 5 : 0), youY + 7, 5, 6);
 
     shelf.forEach((character, index) => {

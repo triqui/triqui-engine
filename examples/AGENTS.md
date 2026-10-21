@@ -13,21 +13,30 @@ a separate piece of work with its own tests.
 Copy the structure of an existing page rather than starting from scratch.
 `platforms.html` is the plain case; `tuning.html` has a control panel.
 
-- `<title>` and `<h1>` read `triqui - <what it shows>`, lower case.
-- One `<p class="intro">`: what to press, in `<strong>`, and in a sentence or two
-  what to notice. Then `<br>` and the row of links to every example.
-- `<div class="readout" id="readout">` above the canvas, for live numbers.
-- `<canvas id="view">` with width and height in the attributes. The script
-  resizes it to the level; the attributes only avoid a jump on load.
-- `<script type="module" src="./name.js">`, last.
-- Styles go inline in the page. The shared look is a white background with thin
-  black lines, the system font and a monospace readout. `minimal` is the only
-  dark page, and that is intentional.
+Pages use Bootstrap 5.3.3 from jsDelivr plus `examples/examples.css`, which
+holds the few shared rules Bootstrap does not cover (readout, canvas, tuning
+panel, DOM stage). Do not add inline styles; use Bootstrap classes or add a
+rule to `examples.css`.
 
-**The row of links is generated.** Do not edit it by hand. Add the example to
-the list in `tools/nav.mjs`, in the order a reader should meet it, and run
-`npm run nav`. `npm run check` fails while any page is out of date or any
-example is missing from the list.
+- `<title>` reads `triqui - <what it shows>`, lower case. The `<h1 class="h4">`
+  shows the same text in sentence case.
+- A navbar with the `triqui` brand, linking to the demo, and the example
+  selector.
+- One `<p class="intro text-body-secondary">`: what to press and, in a sentence
+  or two, what to notice. Keys go in `<kbd>`, engine names in `<code>`.
+- A `card` holding `<div class="card-header bg-body readout" id="readout">` for
+  live numbers and `<canvas id="view">` with width and height in the
+  attributes. The script resizes the canvas to the level; the attributes only
+  avoid a layout jump on load.
+- `<script type="module" src="./name.js">`, last.
+- `minimal` is the only dark page (`data-bs-theme="dark"` on `<html>`), and
+  that is intentional.
+
+**The example selector is generated.** Do not edit it by hand. Add the example
+to the list in `tools/nav.mjs`, in the order a reader should meet it, and run
+`npm run nav`. It writes the selector between the `<!-- examples -->` markers
+on every page, including the demo. `npm run check` fails while any page is
+out of date or any example is missing from the list.
 
 ## The script, `name.js`
 
@@ -75,9 +84,11 @@ then set the velocity. Assigning `x`/`y` draws the body smeared across the jump.
 
 **Show what the engine knows.** The readout is for numbers the reader cannot
 see, such as speeds, timers, counts and the last contact. Draw the facing
-notch from `body.facing`, and falling or standing from `body.grounded`. Keep the
-drawing plain, with grey tiles, black characters and a single accent colour
-where the idea needs one.
+notch from `body.facing`, and falling or standing from `body.grounded`. Draw
+with the Bootstrap palette: tiles in gray-300 (`#dee2e6`) with gray-600
+(`#6c757d`) edges, characters in primary (`#0d6efd`), hazards in danger
+(`#dc3545`), pickups in warning (`#ffc107`), and the other theme colours only
+where the idea needs an accent.
 
 **`console.log` is for callbacks the reader is meant to replace**, with a
 comment saying so. Do not leave debugging output behind.

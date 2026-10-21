@@ -1,0 +1,88 @@
+/*
+    * Shared styles for the demo and the examples, on top of Bootstrap 5.3.
+    * Colours come from Bootstrap variables, so pages using data-bs-theme="dark"
+    * (minimal) need no separate rules.
+*/
+
+.page { max-width: 860px; }
+
+.intro kbd { font-size: 0.8em; }
+
+/* ── readout ─────────────────────────────────────────────────────────────── */
+
+.readout {
+    font: 0.8rem/1.7 var(--bs-font-monospace);
+    min-height: 2.4rem;
+}
+
+.readout div { display: flex; gap: 14px; }
+
+.readout .name { color: var(--bs-secondary-color); width: 92px; flex: none; }
+
+.readout .value { white-space: pre; }
+
+/* ── canvas ──────────────────────────────────────────────────────────────── */
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: none;
+}
+
+/* ── tuning panel ────────────────────────────────────────────────────────── */
+
+.panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2px 24px;
+    font: 0.8rem/1.6 var(--bs-font-monospace);
+}
+
+.knob { display: flex; align-items: center; gap: 10px; }
+
+.knob-name { width: 128px; flex: none; color: var(--bs-secondary-color); }
+
+.knob-value { width: 82px; flex: none; text-align: right; }
+
+.knob .form-range { flex: 1; min-width: 80px; }
+
+.presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.presets .caption { color: var(--bs-secondary-color); font-size: 0.875rem; }
+
+.figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+    font: 0.8rem/1.6 var(--bs-font-monospace);
+}
+
+.figures div { display: flex; gap: 10px; }
+
+.figure-name { color: var(--bs-secondary-color); }
+
+/* ── dom example ─────────────────────────────────────────────────────────── */
+
+.stage { position: relative; overflow: hidden; background: var(--bs-body-bg); }
+
+/* The stage has a fixed pixel size, so its card shrinks to fit it. */
+.card:has(> .stage) { width: max-content; max-width: 100%; }
+
+.tile {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--bs-gray-300);
+    border: 1px solid var(--bs-gray-600);
+}
+
+.body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 2px solid var(--bs-primary);
+    background: var(--bs-body-bg);
+}
+
+.body[data-standing="yes"] { background: var(--bs-primary); }

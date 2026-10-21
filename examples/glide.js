@@ -233,8 +233,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -247,14 +247,14 @@ function draw() {
         }
     }
 
-    context.fillStyle = '#777';
+    context.fillStyle = '#495057';
     for (const platform of engine.platforms) {
         context.fillRect(platform.renderX(alpha), platform.renderY(alpha),
                          platform.width, platform.height);
     }
 
     if (trail.length > 1) {
-        context.strokeStyle = '#aaa';
+        context.strokeStyle = '#adb5bd';
         context.lineWidth = 1;
         context.setLineDash([2, 4]);
         context.beginPath();
@@ -268,17 +268,17 @@ function draw() {
 
     const drawX = body.renderX(alpha);
     const drawY = body.renderY(alpha);
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(drawX, drawY, body.width, body.height);
     context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
-    context.fillStyle = body.grounded ? '#fff' : '#000';
+    context.fillStyle = body.grounded ? '#fff' : '#0d6efd';
     context.fillRect(drawX + (body.facing > 0 ? body.width - 5 : 0), drawY + 7, 5, 6);
 
     /* Wings, drawn while gliding. */
     if (gliding) {
-        context.strokeStyle = '#000';
+        context.strokeStyle = '#0d6efd';
         context.lineWidth = 2;
         context.beginPath();
         context.moveTo(drawX - 9, drawY + 4);

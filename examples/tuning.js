@@ -121,6 +121,7 @@ for (const knob of KNOBS) {
 
     const slider = document.createElement('input');
     slider.type = 'range';
+    slider.className = 'form-range';
     slider.min = knob.min;
     slider.max = knob.max;
     slider.step = knob.step;
@@ -147,6 +148,7 @@ const buttons = document.getElementById('presets');
 for (const preset of PRESETS) {
     const button = document.createElement('button');
     button.type = 'button';
+    button.className = 'btn btn-outline-primary btn-sm';
     button.textContent = preset.name;
     button.addEventListener('click', () => {
         Object.assign(player.tuning, DEFAULT_TUNING, preset.tuning);
@@ -161,6 +163,7 @@ for (const preset of PRESETS) {
 
 const back = document.createElement('button');
 back.type = 'button';
+back.className = 'btn btn-outline-secondary btn-sm';
 back.textContent = 'back to the start';
 back.addEventListener('click', () => {
     player.body.place(SPAWN_X, SPAWN_Y);
@@ -335,8 +338,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -349,7 +352,7 @@ function draw() {
         }
     }
 
-    context.fillStyle = '#888';
+    context.fillStyle = '#adb5bd';
     context.font = '11px ui-monospace, Menlo, Consolas, monospace';
     context.textAlign = 'left';
     context.textBaseline = 'middle';
@@ -363,13 +366,13 @@ function draw() {
 
     const drawX = body.renderX(alpha);
     const drawY = body.renderY(alpha);
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(drawX, drawY, body.width, body.height);
     context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
-    context.fillStyle = body.grounded ? '#fff' : '#000';
+    context.fillStyle = body.grounded ? '#fff' : '#0d6efd';
     context.fillRect(drawX + (body.facing > 0 ? body.width - 5 : 0), drawY + 7, 5, 6);
 }
 

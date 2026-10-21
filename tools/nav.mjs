@@ -1,12 +1,14 @@
 /**
-    * @file nav.mjs, generates the example links on every example page.
+    * @file nav.mjs, generates the example selector on every page.
     *
-    * Every page contains links to all examples, in the order below. To add an
-    * example, add it to the list and run this script. The links are not edited
-    * by hand.
+    * Every example page, and the demo page, contains a select element listing
+    * the demo and all examples, in the order below, with the current page
+    * selected. It is written between the '<!-- examples -->' and
+    * '<!-- /examples -->' markers. To add an example, add it to the list and run
+    * this script. The selector is not edited by hand.
     *
     * Usage:
-    *     node tools/nav.mjs           rewrite the links on every page
+    *     node tools/nav.mjs           rewrite the selector on every page
     *     node tools/nav.mjs --check   fail if any page is out of date, or if an
     *                                  example exists that is not listed
 */
@@ -43,11 +45,30 @@ export const EXAMPLES = [
     ['wrap', 'wrap'],
 ];
 
-const folder = fileURLToPath(new URL('../examples/', import.meta.url));
-const nav = EXAMPLES.map(([file, label]) => `<a href="./${file}.html">${label}</a>`).join(' · ');
-const link = '<a href="\\./[a-z]+\\.html">[^<]+</a>';
-const pattern = new RegExp(`${link}(?: · ${link})*`);
+const root = fileURLToPath(new URL('../', import.meta.url));
+const folder = join(root, 'examples');
+const MARKERS = /<!-- examples -->[\s\S]*?<!-- \/examples -->/;
 const checking = process.argv.includes('--check');
+
+/**
+    * Builds the selector for one page.
+    *
+    * @param {string}  current file name of the page, without extension, or
+    *                          'index' for the demo.
+    * @param {boolean} atRoot  whether the page is in the repository root.
+    * @returns {string} the markup, including the markers.
+*/
+function selector(current, atRoot) {
+    const prefix = atRoot ? './examples/' : './';
+    const demo = atRoot ? './index.html' : '../index.html';
+    const options = [[demo, 'demo', current === 'index']]
+        .concat(EXAMPLES.map(([file, label]) => [prefix + file + '.html', label, file === current]))
+        .map(([href, label, selected]) =>
+            `<option value="${href}"${selected ? ' selected' : ''}>${label}</option>`);
+    return '<!-- examples --><select class="form-select form-select-sm w-auto" '
+        + 'aria-label="Examples" onchange="location.href = this.value">'
+        + options.join('') + '</select><!-- /examples -->';
+}
 
 const pages = readdirSync(folder).filter(name => name.endsWith('.html')).sort();
 const listed = new Set(EXAMPLES.map(([file]) => file + '.html'));
@@ -64,21 +85,24 @@ for (const name of listed) {
     }
 }
 
-for (const page of pages) {
-    const path = join(folder, page);
+const targets = pages.map(page => [join(folder, page), page.replace('.html', ''), false])
+    .concat([[join(root, 'index.html'), 'index', true]]);
+
+for (const [path, name, atRoot] of targets) {
     const html = readFileSync(path, 'utf8');
-    if (!pattern.test(html)) {
-        problems.push(`${page} has no row of example links`);
+    const label = atRoot ? 'index.html' : name + '.html';
+    if (!MARKERS.test(html)) {
+        problems.push(`${label} has no example selector`);
         continue;
     }
-    const updated = html.replace(pattern, nav);
+    const updated = html.replace(MARKERS, selector(name, atRoot));
     if (updated !== html) {
         if (checking) {
-            problems.push(`${page} has an out of date row of links`);
+            problems.push(`${label} has an out of date example selector`);
         }
         else {
             writeFileSync(path, updated);
-            console.log('updated ' + page);
+            console.log('updated ' + label);
         }
     }
 }
@@ -88,4 +112,4 @@ if (problems.length) {
     console.error(checking ? '\nrun: node tools/nav.mjs' : '');
     process.exit(1);
 }
-console.log(checking ? `the links on all ${pages.length} pages are current` : 'done');
+console.log(checking ? `the selector on all ${targets.length} pages is current` : 'done');

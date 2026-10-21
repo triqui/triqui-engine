@@ -29,20 +29,20 @@ const LEGEND = [
 const MAP = LEGEND.map(row => [...row].map(char => (char === '#' ? 1 : 0)));
 
 /**
-    * Colour palette, based on the Visual Studio Code dark theme.
+    * Colour palette, based on the Bootstrap dark theme.
     *
     * @type {object}
 */
 const INK = {
-    background: '#1e1e1e',
-    grid: '#2a2a2b',
-    tile: '#37373d',
-    tileEdge: '#4a4a52',
-    standing: '#4ec9b0',
-    flying: '#dcdcaa',
-    facing: '#1e1e1e',
-    clear: '#569cd6',
-    hit: '#f44747',
+    background: '#212529',
+    grid: '#2b3035',
+    tile: '#343a40',
+    tileEdge: '#495057',
+    standing: '#75b798',
+    flying: '#ffda6a',
+    facing: '#212529',
+    clear: '#6ea8fe',
+    hit: '#ea868f',
 };
 
 /**

@@ -188,8 +188,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -203,8 +203,8 @@ function draw() {
     }
 
     for (const plate of plates) {
-        context.fillStyle = reached.has(plate) ? '#000' : '#fff';
-        context.strokeStyle = '#000';
+        context.fillStyle = reached.has(plate) ? '#0d6efd' : '#fff';
+        context.strokeStyle = '#0d6efd';
         context.lineWidth = 1;
         context.fillRect(plate.x, plate.y, plate.width, plate.height);
         context.strokeRect(plate.x + 0.5, plate.y + 0.5, plate.width - 1, plate.height - 1);
@@ -212,15 +212,15 @@ function draw() {
 
     const drawX = body.renderX(alpha);
     const drawY = body.renderY(alpha);
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(drawX, drawY, body.width, body.height);
     context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
     /* Feet marker, from the body's 'downX'/'downY'. */
     const thickness = 5;
-    context.fillStyle = body.grounded ? '#fff' : '#000';
+    context.fillStyle = body.grounded ? '#fff' : '#0d6efd';
     context.fillRect(
         drawX + (body.downX > 0 ? body.width - thickness : 0),
         drawY + (body.downY > 0 ? body.height - thickness : 0),

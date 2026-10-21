@@ -194,15 +194,15 @@ function draw() {
             }
             const x = col * TILE_SIZE;
             const y = row * TILE_SIZE;
-            context.fillStyle = id === 3 ? '#f0f0f0' : '#bbb';
-            context.strokeStyle = id === 3 ? '#000' : '#555';
+            context.fillStyle = id === 3 ? '#cff4fc' : '#dee2e6';
+            context.strokeStyle = id === 3 ? '#0d6efd' : '#6c757d';
             context.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             context.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
         }
     }
 
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(body.renderX(alpha), body.renderY(alpha), body.width, body.height);
     context.strokeRect(body.renderX(alpha) + 0.75, body.renderY(alpha) + 0.75,

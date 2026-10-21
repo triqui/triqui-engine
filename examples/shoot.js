@@ -80,7 +80,7 @@ player.body.data = { name: 'you' };
 /**
     * @type {string[]} one colour per mode.
 */
-const WALKER_INKS = ['#e0503f', '#e6962a', '#3fa8e0', '#9a5ce0', '#3fbf8a'];
+const WALKER_INKS = ['#dc3545', '#fd7e14', '#0dcaf0', '#6f42c1', '#198754'];
 
 /**
     * Whether there is ground just past a character's leading edge.
@@ -297,13 +297,13 @@ function draw() {
             const x = col * TILE_SIZE;
             const y = row * TILE_SIZE;
             if (id === 1) {
-                context.fillStyle = '#bbb';
-                context.strokeStyle = '#555';
+                context.fillStyle = '#dee2e6';
+                context.strokeStyle = '#6c757d';
                 context.fillRect(x, y, TILE_SIZE, TILE_SIZE);
                 context.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
             }
             if (id === 2) {
-                context.fillStyle = '#555';
+                context.fillStyle = '#6c757d';
                 context.fillRect(x, y, TILE_SIZE, 4);
             }
         }
@@ -313,7 +313,7 @@ function draw() {
         const body = walker.body;
         const x = body.renderX(alpha);
         const y = body.renderY(alpha);
-        context.fillStyle = body.data.flash > 0 ? '#000' : body.data.ink;
+        context.fillStyle = body.data.flash > 0 ? '#0d6efd' : body.data.ink;
         context.fillRect(x, y, body.width, body.height);
         context.fillStyle = '#fff';
         context.fillRect(x + (body.facing > 0 ? body.width - 5 : 0), y + 7, 5, 6);
@@ -322,23 +322,23 @@ function draw() {
     const you = player.body;
     const youX = you.renderX(alpha);
     const youY = you.renderY(alpha);
-    context.fillStyle = you.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = you.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(youX, youY, you.width, you.height);
     context.strokeRect(youX + 0.75, youY + 0.75, you.width - 1.5, you.height - 1.5);
-    context.fillStyle = you.grounded ? '#fff' : '#000';
+    context.fillStyle = you.grounded ? '#fff' : '#0d6efd';
     context.fillRect(youX + (you.facing > 0 ? you.width - 5 : 0), youY + 7, 5, 6);
 
     /* The tail is the segment cast in the last step. */
-    context.strokeStyle = '#000';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 2;
     for (const shot of engine.projectiles) {
         context.beginPath();
         context.moveTo(shot.previousX, shot.previousY);
         context.lineTo(shot.renderX(alpha), shot.renderY(alpha));
         context.stroke();
-        context.fillStyle = '#000';
+        context.fillStyle = '#0d6efd';
         context.beginPath();
         context.arc(shot.renderX(alpha), shot.renderY(alpha), 2.5, 0, Math.PI * 2);
         context.fill();

@@ -1,7 +1,7 @@
 /**
     * @file hurtbox.js, a hurtbox smaller than the collision box.
     *
-    * The white rectangle is the hurtbox; the black outline is the body used for
+    * The white rectangle is the hurtbox; the blue outline is the body used for
     * walls and floors. The hurtbox is inset by a few pixels ('body.hurtbox'), so
     * projectiles that only touch the outline miss.
     *
@@ -341,8 +341,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -355,7 +355,7 @@ function draw() {
         }
     }
 
-    context.fillStyle = '#000';
+    context.fillStyle = '#dc3545';
     for (const spike of spikes) {
         for (let tooth = 0; tooth < 4; tooth++) {
             const left = spike.x + tooth * 8;
@@ -367,7 +367,7 @@ function draw() {
         }
     }
 
-    context.strokeStyle = '#000';
+    context.strokeStyle = '#ffc107';
     context.lineWidth = 1.5;
     for (const coin of coins) {
         if (coin.enabled) {
@@ -377,23 +377,23 @@ function draw() {
         }
     }
 
-    context.fillStyle = '#555';
+    context.fillStyle = '#6c757d';
     for (const turret of TURRETS) {
         context.fillRect(turret.dir > 0 ? turret.x - 4 : turret.x - 6, turret.y - 4, 10, 8);
     }
 
     for (const shot of engine.projectiles) {
-        context.fillStyle = '#000';
+        context.fillStyle = '#0d6efd';
         context.beginPath();
         context.arc(shot.renderX(alpha), shot.renderY(alpha), 2.5, 0, Math.PI * 2);
         context.fill();
     }
 
-    person(walker.body, alpha, '#888');
+    person(walker.body, alpha, '#adb5bd');
 
     /* Blink while invulnerable. */
     if (recovering === 0 || Math.floor(recovering * 12) % 2 === 0) {
-        person(player.body, alpha, '#000');
+        person(player.body, alpha, '#0d6efd');
     }
 }
 

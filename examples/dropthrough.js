@@ -161,21 +161,21 @@ function draw() {
             const x = col * TILE_SIZE;
             const y = row * TILE_SIZE;
             if (id === 1) {
-                context.fillStyle = '#bbb';
-                context.strokeStyle = '#555';
+                context.fillStyle = '#dee2e6';
+                context.strokeStyle = '#6c757d';
                 context.fillRect(x, y, TILE_SIZE, TILE_SIZE);
                 context.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
             }
             if (id === 2) {
                 /* Platforms are drawn hollow while the drop timer runs. */
-                context.fillStyle = body.dropTimer > 0 ? '#ccc' : '#555';
+                context.fillStyle = body.dropTimer > 0 ? '#ced4da' : '#6c757d';
                 context.fillRect(x, y, TILE_SIZE, 4);
             }
         }
     }
 
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(body.renderX(alpha), body.renderY(alpha), body.width, body.height);
     context.strokeRect(body.renderX(alpha) + 0.75, body.renderY(alpha) + 0.75,

@@ -221,8 +221,8 @@ function draw() {
             }
             const x = col * TILE_SIZE;
             const y = row * TILE_SIZE;
-            context.fillStyle = id === 4 ? '#777' : '#bbb';
-            context.strokeStyle = '#555';
+            context.fillStyle = id === 4 ? '#495057' : '#dee2e6';
+            context.strokeStyle = '#6c757d';
             context.fillRect(x, y, TILE_SIZE, TILE_SIZE);
             context.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
             if (id === 4) {
@@ -237,8 +237,8 @@ function draw() {
     const drawX = body.renderX(alpha);
     const drawY = body.renderY(alpha) + squat * body.downY;
 
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(drawX, drawY, body.width, body.height - squat * Math.abs(body.downY));
     context.strokeRect(drawX + 0.75, drawY + 0.75,

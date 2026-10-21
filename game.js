@@ -229,7 +229,7 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.strokeStyle = '#e8e8e8';
+    context.strokeStyle = '#e9ecef';
     context.lineWidth = 1;
     context.beginPath();
     for (let col = 1; col < world.columns; col++) {
@@ -242,8 +242,8 @@ function draw() {
     }
     context.stroke();
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
             if (world.tileAt(col, row) === 0) {
@@ -268,14 +268,14 @@ function draw() {
         const drawX = body.renderX(alpha);
         const drawY = body.renderY(alpha);
 
-        context.fillStyle = body.grounded ? '#000' : '#fff';
-        context.strokeStyle = '#000';
+        context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+        context.strokeStyle = '#0d6efd';
         context.fillRect(drawX, drawY, body.width, body.height);
         context.strokeRect(drawX + 0.75, drawY + 0.75, body.width - 1.5, body.height - 1.5);
 
         /* Filled when grounded, hollow when airborne; the label identifies the
            character. */
-        context.fillStyle = body.grounded ? '#fff' : '#000';
+        context.fillStyle = body.grounded ? '#fff' : '#0d6efd';
         context.fillText(String(index + 1),
                          drawX + body.width / 2, drawY + body.height / 2);
     });
@@ -302,7 +302,7 @@ function drawRays(alpha) {
         const endX = startX + ray.dirX * length;
         const endY = startY + ray.dirY * length;
 
-        context.strokeStyle = ray.hit ? '#000' : '#999';
+        context.strokeStyle = ray.hit ? '#0d6efd' : '#adb5bd';
         context.lineWidth = 1;
         context.setLineDash(ray.hit ? [] : [3, 3]);
         context.beginPath();
@@ -312,7 +312,7 @@ function drawRays(alpha) {
         context.setLineDash([]);
 
         if (ray.hit) {
-            context.fillStyle = '#000';
+            context.fillStyle = '#0d6efd';
             context.beginPath();
             context.arc(endX, endY, CONTACT_DOT_RADIUS, 0, Math.PI * 2);
             context.fill();

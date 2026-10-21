@@ -189,17 +189,17 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#e8e8e8';
+    context.fillStyle = '#cff4fc';
     context.fillRect(pool.x, pool.y, pool.width, pool.height);
-    context.strokeStyle = '#999';
+    context.strokeStyle = '#adb5bd';
     context.lineWidth = 1;
     context.beginPath();
     context.moveTo(pool.x, pool.y + 0.5);
     context.lineTo(pool.x + pool.width, pool.y + 0.5);
     context.stroke();
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
             if (world.tileAt(col, row) === 0) {
@@ -211,8 +211,8 @@ function draw() {
         }
     }
 
-    context.strokeStyle = '#000';
-    context.lineWidth = 1.5;
+    context.strokeStyle = '#ffc107';
+    context.lineWidth = 2;
     for (const coin of coins) {
         if (!coin.enabled) {
             continue;
@@ -223,7 +223,9 @@ function draw() {
         context.stroke();
     }
 
-    context.fillStyle = body.grounded ? '#000' : '#fff';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
+    context.lineWidth = 1.5;
     context.fillRect(body.renderX(alpha), body.renderY(alpha), body.width, body.height);
     context.strokeRect(body.renderX(alpha) + 0.75, body.renderY(alpha) + 0.75,
                        body.width - 1.5, body.height - 1.5);

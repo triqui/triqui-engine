@@ -161,8 +161,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -176,15 +176,15 @@ function draw() {
     }
 
     /* Platforms are interpolated like bodies. */
-    context.fillStyle = '#777';
+    context.fillStyle = '#495057';
     for (const platform of engine.platforms) {
         context.fillRect(platform.renderX(alpha), platform.renderY(alpha),
                          platform.width, platform.height);
     }
 
     const body = player.body;
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(body.renderX(alpha), body.renderY(alpha), body.width, body.height);
     context.strokeRect(body.renderX(alpha) + 0.75, body.renderY(alpha) + 0.75,

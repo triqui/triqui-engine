@@ -175,8 +175,8 @@ function draw() {
     context.fillStyle = '#fff';
     context.fillRect(0, 0, viewWidth, viewHeight);
 
-    context.fillStyle = '#bbb';
-    context.strokeStyle = '#555';
+    context.fillStyle = '#dee2e6';
+    context.strokeStyle = '#6c757d';
     context.lineWidth = 1;
     for (let row = 0; row < world.rows; row++) {
         for (let col = 0; col < world.columns; col++) {
@@ -190,7 +190,7 @@ function draw() {
     }
 
     /* Markers for the open edges. */
-    context.strokeStyle = '#ccc';
+    context.strokeStyle = '#ced4da';
     context.setLineDash([6, 6]);
     context.beginPath();
     context.moveTo(TILE_SIZE, 0.5);
@@ -201,8 +201,8 @@ function draw() {
     context.setLineDash([]);
 
     if (prize.enabled) {
-        context.strokeStyle = '#000';
-        context.lineWidth = 1.5;
+        context.strokeStyle = '#ffc107';
+        context.lineWidth = 2;
         context.beginPath();
         context.arc(prize.x + prize.width / 2, prize.y + prize.height / 2,
                     prize.width / 2 - 1, 0, Math.PI * 2);
@@ -228,8 +228,8 @@ function draw() {
 */
 function paint(x, y) {
     const body = player.body;
-    context.fillStyle = body.grounded ? '#000' : '#fff';
-    context.strokeStyle = '#000';
+    context.fillStyle = body.grounded ? '#0d6efd' : '#fff';
+    context.strokeStyle = '#0d6efd';
     context.lineWidth = 1.5;
     context.fillRect(x, y, body.width, body.height);
     context.strokeRect(x + 0.75, y + 0.75, body.width - 1.5, body.height - 1.5);

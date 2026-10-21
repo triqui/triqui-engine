@@ -27,7 +27,7 @@ game.js          the demo behind index.html, two players sharing the keyboard
 index.html
 examples/        one idea per page; see examples/AGENTS.md
 tests/           node:test, one file per area
-tools/           smoke runner, level checker, link generator, raycast guard
+tools/           smoke runner, level checker, example selector generator, raycast guard
 types/           strict TypeScript consumer that must compile
 ```
 
@@ -38,7 +38,7 @@ npm install      once, for TypeScript
 npm run check
 ```
 
-`check` runs, in order: the raycast.js checksum, the example links, the tests,
+`check` runs, in order: the raycast.js checksum, the example selectors, the tests,
 every example headless for 400 frames, and the TypeScript consumer. All five
 must pass. Do not report work as done on a partial run.
 
